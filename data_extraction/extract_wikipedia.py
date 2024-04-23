@@ -7,8 +7,8 @@ from utils.extract_utils import set_user_agent, set_lang, search_wiki
 search_params = {
     'list': 'search',
     'srprop': '',
-    'srlimit': 1,  # Maximum number of results per query
-    'limit': 1,  # Maximum number of results to return
+    'srlimit': 50000,  # Maximum number of results per query
+    'limit': 50000,  # Maximum number of results to return
     'srsearch': "Krankheit",
     'sroffset': 0  # Starting offset for pagination
 }
