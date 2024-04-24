@@ -81,12 +81,15 @@ def search_wiki(search_params, batch_proc = True):
   """
   set_lang('de')
   pages_list = []
+  visited_pages_counter = 0
   while len(pages_list) < search_params["limit"]:
       raw_results = wiki_request(search_params)
       total_pages = raw_results["query"]["searchinfo"]["totalhits"]
+      print(f"No. Pages found: {total_pages}")
 
       # Add pages from the last query
       for p in raw_results["query"]["search"]:
+          visited_pages_counter +=1
           page_id = p["pageid"]
           title = p["title"]
           value_exists = any(d["pageid"] == page_id for d in pages_list)
@@ -99,7 +102,7 @@ def search_wiki(search_params, batch_proc = True):
               content = page.content
               page_dict = {"title": title, "pageid": page_id, "content": content}
               pages_list.append(page_dict)
-              print(f"{len(pages_list)}")
+              print(f"Retrieved page_id: {page_id}")
 
             except wp.exceptions.DisambiguationError as e:
               print(f"Skipping disambiguation page: {title}")
@@ -107,10 +110,19 @@ def search_wiki(search_params, batch_proc = True):
             print("Duplicate id skipped: {page_id}")
 
       #if sroffset continue extracting pages in batches
-      if batch_proc:
-        # Update sroffset for the next iteration to crawl next batch
-        search_params['sroffset'] = raw_results["continue"]["sroffset"]
-        print(f"continue:{search_params['sroffset']}")
+      if "continue" in raw_results:
+        search_params["sroffset"] = raw_results["continue"]["sroffset"]
+        search_params["continue"] = raw_results["continue"]["continue"]
+        print(f"continue in next it at: {search_params['sroffset']}")
+        print(f"continue_string: {search_params['continue']}")
+        print(f"Number of articles retrieved: {len(pages_list)}")
+        print(f"Number of visited pages: {visited_pages_counter}")
+        print(f"Pages initially found: {total_pages}")
+      else:
+        print("no more pages to fetch")
+        print(f"Number of articles retrieved: {len(pages_list)}")
+        print(f"Number of visited pages: {visited_pages_counter}")
+        print(f"Pages initially found: {total_pages}")
+        break
 
-  print(f"Number of articles retrieved: {len(pages_list)}")
   return pages_list
