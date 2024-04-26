@@ -5,7 +5,7 @@ from langchain_community.vectorstores import Neo4jVector
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_core.documents import Document
 from langchain_openai import ChatOpenAI
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 import os
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -18,7 +18,7 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 NEO4J_DATABASE = os.getenv('NEO4J_DATABASE') or 'neo4j'
 
 #create Document objects for pages
-pages = pd.read_csv("../data/pages_until_sroff_9750.csv")
+pages = pd.read_csv("../data/oldpages_until_sroff_9750.csv")
 documents = []
 for i in [0,1]:
     one_page_text = pages.iloc[i].content[:10000]

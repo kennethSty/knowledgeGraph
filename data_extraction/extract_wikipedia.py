@@ -7,8 +7,8 @@ from utils.extract_utils import set_user_agent, set_lang, search_wiki
 search_params = {
     'list': 'search',
     'srprop': '',
-    'srlimit': 250,  # Maximum number of results per query
-    'limit': 15000,  # Maximum number of results to return
+    'srlimit': 5,  # Maximum number of results per query
+    'limit': 10,  # Maximum number of results to return
     'srsearch': "Krankheit",
     'sroffset': 0  # Starting offset for pagination
 }
@@ -16,4 +16,4 @@ search_params = {
 #extract articles
 pages = search_wiki(search_params=search_params, batch_proc=True)
 pages_df = pd.DataFrame(pages)
-pages_df.to_csv(f"data/pages_until_sroff_{search_params['sroffset']}.csv", encoding="utf-8", index=False) #if locally: ..data
+pages_df.to_csv(f"../data/pages_until_sroff_{search_params['sroffset']}.csv", encoding="utf-8", index=False) #if locally: ..data

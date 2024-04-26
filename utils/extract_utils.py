@@ -1,11 +1,13 @@
 # Third party packages
+import os
+
 import requests
 import time
 from datetime import datetime, timedelta
 import wikipedia as wp
+import re
 
-
-## Global variables
+#Global variables
 API_URL = 'http://en.wikipedia.org/w/api.php'
 USER_AGENT = 'wikipedia (https://github.com/goldsmith/Wikipedia/)'
 RATE_LIMIT = True
@@ -102,7 +104,11 @@ def search_wiki(search_params, batch_proc = True):
               content = page.content
               categories = page.categories
               links = page.links
-              page_dict = {"title": title, "pageid": page_id, "content": content, "links": links, "categories": categories}
+              head_sections = page.sections
+              summary = page.summary
+              page_dict = {"title": title, "pageid": page_id, "content": content,
+                           "links": links, "categories": categories,
+                           "head_sections": head_sections, "summary": summary}
               pages_list.append(page_dict)
               print(f"Retrieved page_id: {page_id}")
 
@@ -128,3 +134,32 @@ def search_wiki(search_params, batch_proc = True):
         break
 
   return pages_list
+
+
+def extract_sections(text):
+    # Define regular expression pattern to extract all titles
+    title_pattern = r'(?<!=)==\s*([^=\n]+?)\s*==(?!=)'
+    titles = re.findall(title_pattern, text)
+
+    #Iterate over text by matching extracted titles and extract everything between as section
+    sections = []
+    counter = 0
+    for i in range(len(titles) - 1):
+        start_title = titles[i]
+        end_title = titles[i + 1]
+        counter+=1
+        section_pattern = re.compile(
+            r'==\s*' + re.escape(start_title) + r'\s*==\s*(.*?)==\s*' + re.escape(end_title) + r'\s*==', re.DOTALL)
+        section_match = section_pattern.search(text)
+        if section_match:
+            sections.append(section_match.group(1).strip())
+
+        # If the last title is reached, extract the section from that title to the end of the text
+    if counter == len(titles) - 1:
+        last_start_title = titles[-1]
+        last_section_pattern = re.compile(r'==\s*' + re.escape(last_start_title) + r'\s*==\s*(.*)', re.DOTALL)
+        last_section_match = last_section_pattern.search(text)
+        if last_section_match:
+            sections.append(last_section_match.group(1).strip())
+
+    return sections, titles
