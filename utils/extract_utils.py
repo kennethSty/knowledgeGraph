@@ -100,7 +100,9 @@ def search_wiki(search_params, batch_proc = True):
               wp.set_lang('de') #set language of wp package to de
               page = wp.page(pageid=page_id)
               content = page.content
-              page_dict = {"title": title, "pageid": page_id, "content": content}
+              categories = page.categories
+              links = page.links
+              page_dict = {"title": title, "pageid": page_id, "content": content, "links": links, "categories": categories}
               pages_list.append(page_dict)
               print(f"Retrieved page_id: {page_id}")
 

@@ -8,7 +8,7 @@ search_params = {
     'list': 'search',
     'srprop': '',
     'srlimit': 250,  # Maximum number of results per query
-    'limit': 50000,  # Maximum number of results to return
+    'limit': 15000,  # Maximum number of results to return
     'srsearch': "Krankheit",
     'sroffset': 0  # Starting offset for pagination
 }
