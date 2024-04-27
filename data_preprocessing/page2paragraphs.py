@@ -1,39 +1,101 @@
-import torch
 import csv
 import spacy
-from scipy.signal import argrelextrema
-import numpy as np
 
 # user libraries
-from utils import preprocess_utils, extract_utils
+from utils import preprocess_utils
+
 
 #enable processing on large csv fiiles
 preprocess_utils.increase_csv_maxsize()
+nlp = spacy.load("de_core_news_sm")
 
-with open("../data/pages_until_sroff_9750.csv") as input_csv, open("../data/chunked_pages.csv", "w") as output_csv:
+#Note: cluster its data/somepath and for local it is ../data/somepath
+with open("../data/pages_until_sroff_9750.csv") as input_csv, \
+        open("../data/chunked_pages.csv", "w") as paragraph_output_csv, \
+        open("../data/total_pages.csv", "w") as page_output_csv:
     reader = csv.DictReader(input_csv)
-    writer = csv.DictWriter(output_csv, fieldnames=["title","pageid","content","links","categories","head_sections","summary", "text_chunks"])
+
+    fieldnames_paragraph_writer = ["page_title", "page_id", "section", "section_title", "section_id"]
+    fieldnames_page_writer = ["title", "content", "page_id", "links", "categories", "summary", "section_ids"]
+
+    paragraph_writer = csv.DictWriter(paragraph_output_csv, fieldnames=fieldnames_paragraph_writer)
+    page_writer = csv.DictWriter(page_output_csv, fieldnames=fieldnames_page_writer)
+    paragraph_writer.writeheader()
+    page_writer.writeheader()
 
     paragraphs_rows = []
-    batch_size = 5
+    page_rows = []
+    batch_size = 1
     processed = 0
     max_tokens = 0
+    empty_paragraphs = 0
+    tokens_sum = 0
+    processed_pages = 0.1
     for row in reader:
-        sections, head_sections = extract_utils.extract_sections(row["content"])
-        row["head_sections"] = str(head_sections)
-        row["text_chunks"] = str(sections)
-        del row["content"]
-        paragraphs_rows.append(row)
+        #extract sections
+        sections, head_section_titles = preprocess_utils.extract_sections(row["content"])
+
+        #rename and delete to free memory
+        row["page_id"] = row["pageid"]
+        del row["head_sections"], row["pageid"]
+
+        #write sections into separate file
+        for i in range(len(head_section_titles)):
+            paragraph_row = {"section": sections[i],
+                             "section_title": head_section_titles[i],
+                             "page_title": row["title"],
+                             "page_id": row["page_id"],
+                             "section_id": f"{i}-{row['page_id']}"}
+            if len(paragraph_row["section"]) == 0:
+                empty_paragraphs+=1
+                print("Empty paragraph skipped.")
+            else:
+                paragraphs_rows.append(paragraph_row)
+                #tokens_in_paragraph = nlp(paragraph_row["section"])
+                #tokens_sum+=len(tokens_in_paragraph)
         if len(paragraphs_rows) >= batch_size:
-            writer.writerows(paragraphs_rows) #TODO solve bug that it cannot write back
+            paragraph_writer.writerows(paragraphs_rows)
             processed += len(paragraphs_rows)
             paragraphs_rows = []
-            print(f"until now processed {processed} documents")
+            print(f"until now processed {processed} paragraphs")
 
-        #also write out last batch if batch_size not reached
+        #write pages into separate file
+        row["section_ids"] = str([f"{i}-{row['page_id']}" for i in head_section_titles])
+        page_rows.append(row)
+        if len(page_rows)>= batch_size:
+            page_writer.writerows(page_rows)
+            processed_pages += len(page_rows)
+            page_rows = []
+            print(f"until now processed {processed_pages} pages")
+
+    #also write out last batch if batch_size not reached
     if paragraphs_rows:
-        writer.writerows(paragraphs_rows)
+        paragraph_writer.writerows(paragraphs_rows)
         processed += len(paragraphs_rows)
         paragraphs_rows = []
+    if page_rows:
+        page_writer.writerows(page_rows)
+        processed_pages += len(page_rows)
+        page_rows = []
 
-    print(f"processed in total {processed} documents")
+#write metadate into txt
+avg_paragraph_length = tokens_sum / processed
+avg_page_length = tokens_sum / processed_pages
+chunking_meta_outputs = [
+    f"Paragraphs processed in total: {processed}",
+    f"Pages processed in total: {processed_pages}",
+    f"empty paragraphs skipped: {empty_paragraphs}",
+    f"Avg. page length: {avg_page_length}",
+    f"Avg. paragraph length: {avg_paragraph_length}"
+]
+meta_file_path = "../data/chunking_metainfo.txt"
+with open(meta_file_path, "w") as meta_output_txt:
+    for i in chunking_meta_outputs:
+        meta_output_txt.write(i+'\n')
+        print(i)
+print(f"Metainfo on chunking has been written to '{meta_file_path}'")
+
+
+
+
+

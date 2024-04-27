@@ -5,4 +5,4 @@
 #SBATCH --mem=1000
 #SBATCH -p dev_gpu_4
 #SBATCH --gres=gpu:1
-srun -u python text2vec.py
+srun -u python -m data_preprocessing.text2vec

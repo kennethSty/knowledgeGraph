@@ -8,7 +8,6 @@ load_dotenv("../graph_generation/keys.env")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 
-
 class GerMedBert:
     """
     This is a class which wraps the interaction with the GerMEDBert model from hf.
