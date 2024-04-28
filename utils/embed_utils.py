@@ -1,10 +1,11 @@
 # Load model directly
+import torch
 from transformers import AutoTokenizer, AutoModel
 from dotenv import load_dotenv
 import os
 
 # Env Vars
-load_dotenv("../graph_generation/keys.env")
+load_dotenv("graph_generation/keys.env") #in local ../graph_generation
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 
@@ -17,15 +18,18 @@ class GerMedBert:
     """
     def __init__(self, device):
         self.device = device
-        self.model = AutoModel.from_pretrained("GerMedBERT/medbert-512",  add_pooling_layer=False, token = HF_TOKEN)
+        self.model = AutoModel.from_pretrained("GerMedBERT/medbert-512",  add_pooling_layer=False, token = HF_TOKEN).to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("GerMedBERT/medbert-512", token = HF_TOKEN)
 
     def embed(self, batch):
-        input_token_batch = self.tokenizer(batch, padding = True, truncation = True, return_tensors="pt")
+        input_token_batch = self.tokenizer(batch, padding = True, truncation = True, return_tensors="pt").to(self.device)
+        input_batch_ids = input_token_batch["input_ids"].to(self.device)
+        print(f"Inputs on device:{input_batch_ids.device}")
 
         # Forward pass through the model
-        outputs = self.model(**input_token_batch)
-        last_hidden_state = outputs.last_hidden_state
+        with torch.no_grad():
+            outputs = self.model(**input_token_batch)
+            last_hidden_state = outputs.last_hidden_state
 
         # Extract the embedding of the [CLS] token (first token)
         cls_embedding = last_hidden_state[:, 0, :]

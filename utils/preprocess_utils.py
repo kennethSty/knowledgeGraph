@@ -52,7 +52,7 @@ def get_embedding_text(row, keys_to_embed_values):
     """
 
     :param
-     row: A dictionary containing the content and metadata of an extracted Wikipedia Page
+        row: A dictionary containing the content and metadata of an extracted Wikipedia Page
     :return:
         The preprocessed dictionary that includes "NA" if values are empty
     """
