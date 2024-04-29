@@ -5,16 +5,18 @@ import csv
 #user libraries
 from utils import embed_utils, preprocess_utils
 
-#getting model ready for embed
+#GerMedBert Model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Detected device:", device)
-model = embed_utils.GerMedBert(device)
-print(f"Model on device: {model.device}")
+#model = embed_utils.GerMedBert(device)
+#print(f"Model on device: {model.device}")
+#OpenAI model
+model = embed_utils.OpenAIEmbedd()
 
 #outer loop variables for embedding loop
 processed_rows = 0
 embedded_rows = 0
-batch_size = 2
+batch_size = 10
 rows_to_embed = []
 rows_to_write = []
 empty_sections = 0
@@ -48,11 +50,12 @@ with open("../data/chunked_pages.csv") as input_csv, \
         # Embed text in batches
         if len(rows_to_embed)>= batch_size:
             text_to_embed_list = [i['text_to_embed'] for i in rows_to_embed]
-            cls_embed_batch = model.embed(text_to_embed_list)
-            print(f"Dim of embedded batch (batchsize, emb_dim): {cls_embed_batch.size()}")
+            batch_embedding = model.embed(text_to_embed_list)
+            print(f"Dim of embedded batch: {len(batch_embedding)}")
+            print(f"Dim of embedding per seq: {len(batch_embedding[0])}")
 
             # take batch of embeddings and batch of rows and merge
-            for cls_embed,row_to_embed in zip(cls_embed_batch, rows_to_embed):
+            for cls_embed,row_to_embed in zip(batch_embedding, rows_to_embed):
                 row_to_embed["cls_embed"] = cls_embed
                 rows_to_write.append(row_to_embed)
                 writer.writerows(rows_to_write)
@@ -66,11 +69,11 @@ with open("../data/chunked_pages.csv") as input_csv, \
     #also embed the last batch
     if rows_to_embed:
         text_to_embed_list = [i['text_to_embed'] for i in rows_to_embed]
-        cls_embed_batch = model.embed(text_to_embed_list)
-        print(f"Embedding the last batch of size: {len(cls_embed_batch)}")
+        batch_embedding = model.embed(text_to_embed_list)
+        print(f"Embedding the last batch of size: {len(batch_embedding)}")
 
         # take batch of embeddings and batch of rows and merge
-        for cls_embed, row_to_embed in zip(cls_embed_batch, rows_to_embed):
+        for cls_embed, row_to_embed in zip(batch_embedding, rows_to_embed):
             row_to_embed["cls_embed"] = cls_embed
             rows_to_write.append(row_to_embed)
             writer.writerows(rows_to_write)
