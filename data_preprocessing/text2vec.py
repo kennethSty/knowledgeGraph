@@ -25,7 +25,7 @@ unique_section_set = set()
 with open("../data/chunked_pages.csv") as input_csv, \
     open("../data/embedded_chunks.csv", "w") as output_csv:
     reader = csv.DictReader(input_csv)
-    field_names = reader.fieldnames + ['text_to_embed', 'cls_embed', 'section', 'section_title', 'section_id']
+    field_names = reader.fieldnames + ['text_to_embed', 'cls_embed']
     writer = csv.DictWriter(output_csv, field_names)
     writer.writeheader() #enforce writing header as otherwise broken csv structure
 
