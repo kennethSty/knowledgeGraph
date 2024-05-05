@@ -19,13 +19,13 @@ embedded_rows = 0
 batch_size = 10
 rows_to_embed = []
 rows_to_write = []
-empty_sections = 0
-unique_section_set = set()
+empty_pages = 0
+unique_pages_set = set()
 
 #open files for reading and writing csv output
 #note use ../ in local but data in cluster
-with open("../data/small_chunked_pages.csv") as input_csv, \
-    open("../data/small_embedded_chunks.csv", "w") as output_csv:
+with open("../data/small_total_pages.csv") as input_csv, \
+    open("../data/small_embedded_pages.csv", "w") as output_csv:
     reader = csv.DictReader(input_csv)
     field_names = reader.fieldnames + ['text_to_embed', 'cls_embed']
     writer = csv.DictWriter(output_csv, field_names)
@@ -35,17 +35,17 @@ with open("../data/small_chunked_pages.csv") as input_csv, \
         processed_rows += 1
         # Filter out rows with empty sections, duplicates and of uncompatible data type
         try:
-            row['text_to_embed'] = preprocess_utils.get_embedding_text(row=row,                                                            keys_to_embed_values=["page_title", "section_title", "section"])
+            row['text_to_embed'] = preprocess_utils.get_embedding_text(row=row,keys_to_embed_values=["title", "summary"])
         except ValueError:
             continue
-        if row['section']=='NA':
-            empty_sections +=1
+        if row['text_to_embed']=='NA':
+            empty_pages +=1
             continue
-        if row['section'] in unique_section_set:
+        if row['text_to_embed'] in unique_pages_set:
             continue
 
         # Add section to unique set for duplicate check & collect remaining rows for embedding
-        unique_section_set.add(row['section'])
+        unique_pages_set.add(row['text_to_embed'])
         rows_to_embed.append(row)
         # Embed text in batches
         if len(rows_to_embed)>= batch_size:
@@ -58,7 +58,7 @@ with open("../data/small_chunked_pages.csv") as input_csv, \
             for cls_embed,row_to_embed in zip(batch_embedding, rows_to_embed):
                 row_to_embed["cls_embed"] = cls_embed
                 rows_to_write.append(row_to_embed)
-                writer.writerows(rows_to_write)
+            writer.writerows(rows_to_write)
 
             # once all processed batch is written, free up the lists again
             embedded_rows += len(rows_to_write)
@@ -76,15 +76,15 @@ with open("../data/small_chunked_pages.csv") as input_csv, \
         for cls_embed, row_to_embed in zip(batch_embedding, rows_to_embed):
             row_to_embed["cls_embed"] = cls_embed
             rows_to_write.append(row_to_embed)
-            writer.writerows(rows_to_write)
+        writer.writerows(rows_to_write)
 
         # once all processed batch is written, free up the lists again
         embedded_rows += len(rows_to_write)
         print(f"Finished Embedding")
-        print(f"Processed Sections: {processed_rows}")
-        print(f"Embedded sections: {embedded_rows}")
-        print(f"Num. unique sections: {len(unique_section_set)}")
-        print(f"Num. empty sections: {empty_sections}")
+        print(f"Processed Pages: {processed_rows}")
+        print(f"Embedded Pages: {embedded_rows}")
+        print(f"Num. unique Pages: {len(unique_pages_set)}")
+        print(f"Num. empty Pages: {empty_pages}")
 
         rows_to_embed = []
         rows_to_write = []

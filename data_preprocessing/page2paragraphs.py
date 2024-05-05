@@ -1,3 +1,4 @@
+import ast
 import csv
 import spacy
 
@@ -10,13 +11,13 @@ preprocess_utils.increase_csv_maxsize()
 nlp = spacy.load("de_core_news_sm")
 
 #Note: cluster its data/somepath and for local it is ../data/somepath
-with open("../data/pages_until_sroff_9750.csv") as input_csv, \
-        open("../data/chunked_pages.csv", "w") as paragraph_output_csv, \
-        open("../data/total_pages.csv", "w") as page_output_csv:
+with open("../data/pages_until_sroff_10.csv") as input_csv, \
+        open("../data/small_chunked_pages.csv", "w") as paragraph_output_csv, \
+        open("../data/small_total_pages.csv", "w") as page_output_csv:
     reader = csv.DictReader(input_csv)
 
-    fieldnames_paragraph_writer = ["page_title", "page_id", "section", "section_title", "section_id"]
-    fieldnames_page_writer = ["title", "content", "page_id", "links", "categories", "summary", "section_ids"]
+    fieldnames_paragraph_writer = ["page_title", "page_id", "section", "section_title", "section_id", "section_counter"]
+    fieldnames_page_writer = ["title", "page_id", "links", "categories", "summary", "section_ids"]
 
     paragraph_writer = csv.DictWriter(paragraph_output_csv, fieldnames=fieldnames_paragraph_writer)
     page_writer = csv.DictWriter(page_output_csv, fieldnames=fieldnames_page_writer)
@@ -30,10 +31,11 @@ with open("../data/pages_until_sroff_9750.csv") as input_csv, \
     max_tokens = 0
     empty_paragraphs = 0
     tokens_sum = 0
-    processed_pages = 0.1
+    processed_pages = 0
     for row in reader:
         #extract sections
         sections, head_section_titles = preprocess_utils.extract_sections(row["content"])
+        del row["content"]
 
         #rename and delete to free memory
         row["page_id"] = row["pageid"]
@@ -45,14 +47,15 @@ with open("../data/pages_until_sroff_9750.csv") as input_csv, \
                              "section_title": head_section_titles[i],
                              "page_title": row["title"],
                              "page_id": row["page_id"],
+                             "section_counter": f"{i}",
                              "section_id": f"{i}-{row['page_id']}"}
             if len(paragraph_row["section"]) == 0:
                 empty_paragraphs+=1
                 print("Empty paragraph skipped.")
             else:
                 paragraphs_rows.append(paragraph_row)
-                #tokens_in_paragraph = nlp(paragraph_row["section"])
-                #tokens_sum+=len(tokens_in_paragraph)
+                tokens_in_paragraph = nlp(paragraph_row["section"])
+                tokens_sum+=len(tokens_in_paragraph)
         if len(paragraphs_rows) >= batch_size:
             paragraph_writer.writerows(paragraphs_rows)
             processed += len(paragraphs_rows)
@@ -60,7 +63,7 @@ with open("../data/pages_until_sroff_9750.csv") as input_csv, \
             print(f"until now processed {processed} paragraphs")
 
         #write pages into separate file
-        row["section_ids"] = str([f"{i}-{row['page_id']}" for i in head_section_titles])
+        row["categories"] = str([preprocess_utils.extract_category(category) for category in ast.literal_eval(row["categories"])])
         page_rows.append(row)
         if len(page_rows)>= batch_size:
             page_writer.writerows(page_rows)

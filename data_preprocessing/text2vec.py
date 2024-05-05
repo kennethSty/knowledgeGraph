@@ -11,12 +11,12 @@ print("Detected device:", device)
 #model = embed_utils.GerMedBert(device)
 #print(f"Model on device: {model.device}")
 #OpenAI model
-model = embed_utils.OpenAIEmbedd()
+model = embed_utils.OpenAIEmbedd(model_name = "text-embedding-3-small")
 
 #outer loop variables for embedding loop
 processed_rows = 0
 embedded_rows = 0
-batch_size = 10
+batch_size = 8
 rows_to_embed = []
 rows_to_write = []
 empty_sections = 0
@@ -24,8 +24,8 @@ unique_section_set = set()
 
 #open files for reading and writing csv output
 #note use ../ in local but data in cluster
-with open("../data/chunked_pages.csv") as input_csv, \
-    open("../data/embedded_chunks.csv", "w") as output_csv:
+with open("../data/small_chunked_pages.csv") as input_csv, \
+    open("../data/small_embedded_chunks.csv", "w") as output_csv:
     reader = csv.DictReader(input_csv)
     field_names = reader.fieldnames + ['text_to_embed', 'cls_embed']
     writer = csv.DictWriter(output_csv, field_names)
@@ -41,11 +41,12 @@ with open("../data/chunked_pages.csv") as input_csv, \
         if row['section']=='NA':
             empty_sections +=1
             continue
-        if row['section'] in unique_section_set:
+        if row['section_id'] in unique_section_set:
             continue
+            print("duplicate skipped")
 
         # Add section to unique set for duplicate check & collect remaining rows for embedding
-        unique_section_set.add(row['section'])
+        unique_section_set.add(row['section_id'])
         rows_to_embed.append(row)
         # Embed text in batches
         if len(rows_to_embed)>= batch_size:
@@ -58,9 +59,8 @@ with open("../data/chunked_pages.csv") as input_csv, \
             for cls_embed,row_to_embed in zip(batch_embedding, rows_to_embed):
                 row_to_embed["cls_embed"] = cls_embed
                 rows_to_write.append(row_to_embed)
-                writer.writerows(rows_to_write)
-
             # once all processed batch is written, free up the lists again
+            writer.writerows(rows_to_write)
             embedded_rows += len(rows_to_write)
             print(f"Embedded rows: {embedded_rows}")
             rows_to_embed = []
@@ -76,7 +76,7 @@ with open("../data/chunked_pages.csv") as input_csv, \
         for cls_embed, row_to_embed in zip(batch_embedding, rows_to_embed):
             row_to_embed["cls_embed"] = cls_embed
             rows_to_write.append(row_to_embed)
-            writer.writerows(rows_to_write)
+        writer.writerows(rows_to_write)
 
         # once all processed batch is written, free up the lists again
         embedded_rows += len(rows_to_write)

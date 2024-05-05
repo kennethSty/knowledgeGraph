@@ -1,0 +1,5 @@
+Paragraphs processed in total: 93
+Pages processed in total: 10
+empty paragraphs skipped: 10
+Avg. page length: 3034.1
+Avg. paragraph length: 326.247311827957

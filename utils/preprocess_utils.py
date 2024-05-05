@@ -58,7 +58,7 @@ def get_embedding_text(row, keys_to_embed_values):
     """
 
     # Make dict keys german fro German LLM
-    ger_dict = {"section": "Inhalt", "section_title": "Untertitel", "page_title": "Titel"}
+    ger_dict = {"section": "Inhalt", "section_title": "Untertitel", "page_title": "Titel", "summary": "Zusammenfassung", "title": "Titel"}
 
     embed_info_list = []
     # Read value of keys and modify to meaningful info strings
@@ -79,5 +79,20 @@ def get_embedding_text(row, keys_to_embed_values):
     embedding_text = "\n".join(embed_info_list)
 
     return embedding_text
+
+def extract_category(input_string):
+    # Define a regex pattern to match "Kategorie:" followed by any characters
+    pattern = r'Kategorie:(.+)'
+
+    # Search for the pattern in the input string
+    match = re.search(pattern, input_string)
+
+    # If a match is found, extract the captured group
+    if match:
+        category = match.group(1).strip()  # Remove leading and trailing whitespaces
+        return category
+    else:
+        return None  # Return None if "Kategorie:" is not found
+
 
 
