@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores import Neo4jVector
+from langchain_core.prompts import ChatPromptTemplate
 
 class KnowledgeGraph(Neo4jGraph):
     # load env variables
@@ -60,7 +61,7 @@ RETURN cat
 sect_page_edge_query = """
 MATCH (p:Page), (s:Section)
 WHERE p.page_id = s.page_id
-MERGE (s)-[newRelationship:PART_OF]->(p)
+MERGE (s)-[newRelationship:TEIL_VON]->(p)
 RETURN count(newRelationship)
 """
 
@@ -68,7 +69,7 @@ page_cat_edge_query="""
 MATCH (p:Page)
 UNWIND p.categories AS categoryName
 MATCH (c:Category {name: categoryName})
-MERGE (p)-[r:BELONGS_TO]->(c)
+MERGE (p)-[r:GEHÖRT_ZU]->(c)
 RETURN count(r)
 """
 
@@ -91,10 +92,69 @@ page_first_sect = """
 MATCH (p:Page), (s:Section)
 WHERE p.page_id = s.page_id
     AND s.section_counter = "0"
-MERGE (p)-[r:FIRST_SECTION]->(s)
+MERGE (p)-[r:ERSTE_SECTION]->(s)
 RETURN count(r)
 """
 
+sect_auto_nodes_query = """
+MATCH (s:Section {section_id: $section_id}), (n {id: $node_id})
+CREATE (s)-[r:NENNT]->(n)
+RETURN count(r)
+"""
+
+# graph transformer prompt
+ger_system_prompt = (
+"# Anweisungen für die Erstellung eines Wissensgraphen mit GPT-4\n"
+"## 1. Überblick\n"
+"Du bist ein erstklassiger Algorithmus, der darauf ausgelegt ist, Informationen in strukturierten Formaten zu extrahieren, um einen Wissensgraphen aufzubauen.\n"
+"Versuche, so viele Informationen wie möglich aus dem Text zu erfassen, ohne die Genauigkeit zu beeinträchtigen. Füge keine Informationen hinzu, die im Text nicht ausdrücklich erwähnt werden\n"
+"- **Knoten** repräsentieren Entitäten und Konzepte.\n"
+"- Das Ziel ist es, Einfachheit und Klarheit im Wissensgraphen zu erreichen, um ihn\n"
+"für ein breites Publikum zugänglich zu machen.\n"
+"## 2. Beschriftung der Knoten\n"
+"- **Konsistenz**: Stelle sicher, dass Du verfügbare Typen für Knotenbeschriftungen verwendest.\n"
+"Verwende grundlegende oder elementare Typen für Knotenbeschriftungen.\n"
+"- Wenn Du beispielsweise eine Entität identifizierst, die eine Person darstellt, "
+"bezeichne sie immer als **'Person'**. Vermeide die Verwendung spezifischerer Begriffe "
+"wie 'Mathematiker' oder 'Wissenschaftler'"
+"  - **Knoten-IDs**: Verwende niemals Ganzzahlen als Knoten-IDs. Knoten-IDs sollten "
+"Namen oder menschenlesbare Bezeichnungen sein, die im Text gefunden werden.\n"
+"- **Beziehungen** repräsentieren Verbindungen zwischen Entitäten oder Konzepten.\n"
+"Stelle bei der Konstruktion von Wissensgraphen Konsistenz und Allgemeinheit in Beziehungstypen sicher."
+"Verwende statt spezifischer und momentaner Typen "
+"wie 'WURDE_PROFESSOR', allgemeinere und zeitlose Beziehungstypen "
+"wie 'PROFESSOR'. Stelle sicher, dass allgemeine und zeitlose Beziehungstypen verwendet werden!\n"
+"## 3. Koreferenzauflösung\n"
+"- **Beibehaltung der Entitätskonsistenz**: Beim Extrahieren von Entitäten ist es wichtig, "
+"sicherzustellen, dass Konsistenz gewahrt wird.\n"
+'Wenn eine Entität, wie "John Doe", mehrmals im Text erwähnt wird, '
+"aber mit unterschiedlichen Namen oder Pronomen (z. B. 'Joe', 'er') bezeichnet wird, "
+"verwende immer die vollständigste Bezeichnung für diese Entität im "
+"Wissensgraphen. Verwende in diesem Beispiel 'John Doe' als Entitäts-ID.\n"
+"Denke daran, der Wissensgraph sollte kohärent und leicht verständlich sein, "
+"so dass die Beibehaltung der Konsistenz in Entitätsverweisen entscheidend ist.\n"
+"## 4. Strikte Einhaltung\n"
+"Halte Dich strikt an die Regeln. Nichteinhaltung führt zur Beendigung."
+)
+
+german_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            ger_system_prompt,
+        ),
+        (
+            "human",
+            (
+                "Tipp: Stelle sicher, dass Du in dem richtigen Format antwortest."
+                "Gebe keinerlei Erklärungen oder Erläuterungen aus. "
+                "Sämtliche Bezeichnungen von Knoten und Beziehungen sollen in deutscher Sprache sein."
+                "Verwende das angegebene Format,"
+                "um Informationen aus der folgenden Eingabe zu extrahieren: {input}"
+            ),
+        ),
+    ]
+)
 
 
 

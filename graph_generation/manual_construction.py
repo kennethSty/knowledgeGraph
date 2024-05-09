@@ -3,18 +3,27 @@ import os
 import json
 import csv
 import ast
+from langchain_openai import ChatOpenAI
+from langchain_experimental.graph_transformers import LLMGraphTransformer
+from langchain_core.documents import Document
 
 #user specified libraries
 from utils import kg_utils
+from utils.kg_utils import german_prompt
 
 
 # Initialize Knowledge Graph
 kg = kg_utils.KnowledgeGraph()
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+llm = ChatOpenAI(temperature=0, model_name="gpt-4-0125-preview", api_key = OPENAI_API_KEY)
+llm_transformer = LLMGraphTransformer(llm=llm, prompt=german_prompt)
 
 # Create Nodes for sections, pages, categories
 # First Sections
 with open("../data/small_embedded_chunks.csv") as input_csv:
     processed_rows = 0
+    batch_size = 1
+    document_batch = []
     reader = csv.DictReader(input_csv)
 
     #delete all existing nodes and relationshiops
@@ -26,7 +35,24 @@ with open("../data/small_embedded_chunks.csv") as input_csv:
     for row in reader:
         processed_rows+=1
         row["cls_embed"] = ast.literal_eval(row["cls_embed"])
+        #create node for each section
         kg.query(query=kg_utils.merge_section_node_query, params = row)
+        #automatically extract nodes from each section
+        doc = Document(page_content=row["section"])
+        document_batch.append(doc)
+        if len(document_batch) >= batch_size:
+            graph_documents = llm_transformer.convert_to_graph_documents(document_batch)
+            print(f"Num Nodes:{len(graph_documents[0].nodes)}")
+            print(f"Num Relationships:{len(graph_documents[0].relationships)}")
+            kg.add_graph_documents(graph_documents=graph_documents)
+            for gdoc in graph_documents:
+                for node in gdoc.nodes:
+                    node_dict = {"section_id": row["section_id"], "node_id": node.id}
+                    kg.query(query=kg_utils.sect_auto_nodes_query, params=node_dict)
+
+            # manually add "mentions" connection
+            document_batch = []
+
 
     print(f"Created {processed_rows} section-nodes")
 

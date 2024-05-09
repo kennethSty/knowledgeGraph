@@ -17,7 +17,7 @@ with open("../data/pages_until_sroff_10.csv") as input_csv, \
     reader = csv.DictReader(input_csv)
 
     fieldnames_paragraph_writer = ["page_title", "page_id", "section", "section_title", "section_id", "section_counter"]
-    fieldnames_page_writer = ["title", "page_id", "links", "categories", "summary", "section_ids"]
+    fieldnames_page_writer = ["title", "page_id", "links", "categories", "summary", "section_ids", "content"]
 
     paragraph_writer = csv.DictWriter(paragraph_output_csv, fieldnames=fieldnames_paragraph_writer)
     page_writer = csv.DictWriter(page_output_csv, fieldnames=fieldnames_page_writer)
@@ -35,7 +35,7 @@ with open("../data/pages_until_sroff_10.csv") as input_csv, \
     for row in reader:
         #extract sections
         sections, head_section_titles = preprocess_utils.extract_sections(row["content"])
-        del row["content"]
+        row["content"]
 
         #rename and delete to free memory
         row["page_id"] = row["pageid"]
