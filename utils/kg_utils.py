@@ -98,7 +98,13 @@ RETURN count(r)
 
 sect_auto_nodes_query = """
 MATCH (s:Section {section_id: $section_id}), (n {id: $node_id})
-CREATE (s)-[r:NENNT]->(n)
+CREATE (s)-[r:ERWÄHNT]->(n)
+RETURN count(r)
+"""
+
+page_auto_nodes_query = """
+MATCH (p:Page {page_id: $page_id}), (n {id: $node_id})
+CREATE (p)-[r:ERWÄHNT]->(n)
 RETURN count(r)
 """
 
