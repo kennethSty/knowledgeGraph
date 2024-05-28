@@ -1,13 +1,51 @@
+import time
+
 from dotenv import load_dotenv
 import os
 from langchain_community.graphs import Neo4jGraph
-from langchain_community.vectorstores import Neo4jVector
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.llms import LlamaCpp
+from langchain_core.language_models import BaseLanguageModel
+from langchain_experimental.graph_transformers import LLMGraphTransformer
+
+#user native package
+from config import config
+config = config.load_config()
+
+# helper function initiating a llama.cpp llm
+def instantiate_llm(temperature = 0,
+                    max_tokens = 1000,
+                    n_ctx = 2048,
+                    top_p = 1,
+                    n_gpu_layers = -1,
+                    n_batch = 512,
+                    verbose = True,
+                    model=config['llm']):
+
+    llm = LlamaCpp(
+        model_path=config[model],
+        temperature=temperature,
+        max_tokens=max_tokens,
+        n_ctx=n_ctx,
+        top_p=top_p,
+        n_gpu_layers=n_gpu_layers,
+        n_batch=n_batch,
+        verbose=verbose,  # Verbose is required to pass to the callback manager
+        )
+    return llm
+
+
+class LLamaGraphTransformer(LLMGraphTransformer):
+    def __init__(self,
+        llm: BaseLanguageModel,
+        prompt: ChatPromptTemplate,
+    ) -> None:
+        self.chain = prompt | llm
 
 class KnowledgeGraph(Neo4jGraph):
     # load env variables
     def __init__(self):
-        load_dotenv('keys.env', override=True)
+        load_dotenv('../config/keys.env', override=True)
         self.NEO4J_URI = os.getenv('NEO4J_URL')
         self.NEO4J_USERNAME = os.getenv('NEO4J_USERNAME')
         self.NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')

@@ -1,25 +1,57 @@
 from dotenv import load_dotenv
 import os
-import json
 import csv
 import ast
+import torch
 from langchain_openai import ChatOpenAI
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_core.documents import Document
+from transformers import pipeline
+
+
 
 #user specified libraries
 from utils import kg_utils
 from utils.kg_utils import german_prompt
-
+from config import config
 
 # Initialize Knowledge Graph & delete existing nodes and relationshiops
 kg = kg_utils.KnowledgeGraph()
 kg.query("""
     MATCH (n)
     DETACH DELETE n""")
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-llm = ChatOpenAI(temperature=0, model_name="gpt-4-0125-preview", api_key = OPENAI_API_KEY)
-llm_transformer = LLMGraphTransformer(llm=llm, prompt=german_prompt)
+
+#get llm settings from config
+load_dotenv('../config/keys.env', override=True)
+config = config.load_config()
+
+#OpenAI Models
+if(config['llm']=='gpt-4'):
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    llm = ChatOpenAI(temperature=0, model_name="gpt-4", api_key = OPENAI_API_KEY) #gpt-4-0125-preview
+    llm_transformer = LLMGraphTransformer(llm=llm, prompt=german_prompt)
+
+#LLama models
+if(config['llm']=='llama3' and config['local_modelling']):
+    if(config['modelling_location']=='local'):
+        llm = kg_utils.instantiate_llm()
+        llm_transformer = kg_utils.LLamaGraphTransformer(llm = llm, prompt=german_prompt)
+    elif (config['modelling_location'] == 'cluster'):
+        #set device etc if device CPU break
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if device == "cpu":
+            print("Detected device cpu")
+            raise Exception
+        print("Detected device:", device)
+        llm_transformer = pipeline("text-generation", model="meta-llama/Meta-Llama-3-8B", device_map='auto')
+
+if (config['llm'] == 'llama2' and config['local_modelling']):
+    if (config['modelling_location'] == 'local'):
+        llm = kg_utils.instantiate_llm()
+        llm_transformer = kg_utils.LLamaGraphTransformer(llm=llm, prompt=german_prompt)
+    elif (config['modelling_location'] == 'cluster'):
+        llm_transformer = pipeline("text-generation", model="meta-llama/Llama-2-7b-hf", device_map='auto')
+
 
 # Create Nodes for sections, pages, categories
 # Pages & Categories
@@ -56,14 +88,14 @@ with open("../data/small_embedded_pages.csv") as pages_input:
 # Sections & Auto Nodes
 with open("../data/small_embedded_chunks.csv") as input_csv:
     processed_rows = 0
-    batch_size = 1
-    document_batch = []
     reader = csv.DictReader(input_csv)
+    max_tries = 3
 
     #write in new nodes and relationships
     for row in reader:
-        if processed_rows == 15:
-            break
+        tries = 0
+        if processed_rows == 3:
+            break ##only for test
         processed_rows+=1
         print(f"Processing section number: {processed_rows}")
         row["cls_embed"] = ast.literal_eval(row["cls_embed"])

@@ -5,6 +5,7 @@
 *.jsonld
 *.json
 *.txt
+*.gguf
 
 #ignore .env files
 *.env
