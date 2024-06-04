@@ -1,5 +1,3 @@
-import time
-
 from dotenv import load_dotenv
 import os
 from langchain_community.graphs import Neo4jGraph
@@ -28,9 +26,11 @@ def instantiate_llm(temperature = 0,
         max_tokens=max_tokens,
         n_ctx=n_ctx,
         top_p=top_p,
+        f16_kv=True,
         n_gpu_layers=n_gpu_layers,
         n_batch=n_batch,
-        verbose=verbose,  # Verbose is required to pass to the callback manager
+        verbose=verbose,
+        grammar_path="/Users/Kenneth/PycharmProjects/knowledgeGraph/models/grammar.gbnf"# Verbose is required to pass to the callback manager
         )
     return llm
 
@@ -147,6 +147,27 @@ RETURN count(r)
 """
 
 # graph transformer prompt
+med_system_prompt = (
+"# Anweisungen für die Erstellung eines medizinischen Wissensgraphen mit GPT-4\n"
+"## 1. Überblick\n"
+"Du bist ein spezialisiertes Sprachmodell, das darauf ausgelegt ist, medizinische Informationen in strukturierten Formaten zu extrahieren, um einen Wissensgraphen aufzubauen. Erfasse so viele medizinische Informationen wie möglich aus dem Text, ohne die Genauigkeit zu beeinträchtigen. Füge keine Informationen hinzu, die im Text nicht ausdrücklich erwähnt werden.\n"
+"- **Knoten** repräsentieren medizinische Entitäten und Konzepte.\n"
+"- Das Ziel ist es, Einfachheit und Klarheit im Wissensgraphen zu erreichen, um ihn für medizinisches Fachpersonal und andere Interessierte zugänglich zu machen.\n"
+"## 2. Beschriftung der Knoten\n"
+"- **Konsistenz**: "
+"- Stelle sicher, dass Du verfügbare Typen für Knotenbeschriftungen verwendest. Verwende grundlegende oder elementare Typen für allgemeine Knotenbeschriftungen. Für speziell medizinische Entitäten die Krankheiten, Symptome oder Behandlungsweisen beschreiben, verwende spezielle Begriffe wie 'Katzenschreisyndrom', 'Nicotinamide Mononucleotide', 'Canis Latrans', 'Agnosie der Temperaturempfindung', 'Palatopharyngeus', 'Glukosereguliertes Protein 78 kda', 'Ryanodin-Rezeptoren', 'Membrane Microdomains', oder 'Symptome, unterer Harntrakt'.\n"
+"- Wenn Du beispielsweise eine die Entitäten 'Keuchhusten' und 'trockener Husten' als Symptom für eine Krankheit identifizierst, dann verwende die Begriffe 'Keuchhusten' und 'trockener Husten' auch als Knotenbezeichnung und nicht den allgemeineren Term 'Husten'.\n"
+"- **Knoten-IDs**: Verwende niemals Ganzzahlen als Knoten-IDs. Knoten-IDs sollten Namen oder menschenlesbare Bezeichnungen sein, die im Text genau so gefunden werden.\n"
+"## 3. Beziehungen\n"
+"- **Beziehungen** repräsentieren Verbindungen zwischen medizinischen Entitäten oder Konzepten. Stelle bei der Konstruktion von Wissensgraphen Konsistenz und Allgemeinheit in Beziehungstypen sicher. Verwende statt spezifischer und momentaner Typen wie 'WURDE_DIAGNOSE', allgemeinere und zeitlose Beziehungstypen wie 'DIAGNOSE'.\n"
+"- Stelle sicher, dass allgemeine und zeitlose Beziehungstypen verwendet werden.\n"
+"## 4. Koreferenzauflösung\n"
+"- **Beibehaltung der Entitätskonsistenz**: Beim Extrahieren von medizinischen Entitäten ist es wichtig, sicherzustellen, dass Konsistenz gewahrt wird. Wenn eine Entität, wie 'Aspirin', mehrmals im Text erwähnt wird, aber mit unterschiedlichen Namen oder Pronomen (z. B. 'das Medikament', 'es') bezeichnet wird, verwende immer die vollständigste Bezeichnung für diese Entität im Wissensgraphen. Verwende in diesem Beispiel 'Aspirin' als Entitäts-ID.\n"
+"- Der Wissensgraph sollte kohärent und leicht verständlich sein, daher ist die Beibehaltung der Konsistenz in Entitätsverweisen entscheidend.\n"
+"## 5. Strikte Einhaltung\n"
+"Halte Dich strikt an die Regeln. Nichteinhaltung führt zur Beendigung."
+)
+
 ger_system_prompt = (
 "# Anweisungen für die Erstellung eines Wissensgraphen mit GPT-4\n"
 "## 1. Überblick\n"
@@ -186,6 +207,25 @@ german_prompt = ChatPromptTemplate.from_messages(
         (
             "system",
             ger_system_prompt,
+        ),
+        (
+            "human",
+            (
+                "Tipp: Stelle sicher, dass Du in dem richtigen Format antwortest."
+                "Gebe keinerlei Erklärungen oder Erläuterungen aus. "
+                "Sämtliche Bezeichnungen von Knoten und Beziehungen sollen in deutscher Sprache sein."
+                "Verwende das angegebene Format,"
+                "um Informationen aus der folgenden Eingabe zu extrahieren: {input}"
+            ),
+        ),
+    ]
+)
+
+german_med_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            med_system_prompt,
         ),
         (
             "human",

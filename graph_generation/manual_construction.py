@@ -2,18 +2,17 @@ from dotenv import load_dotenv
 import os
 import csv
 import ast
-import torch
 from langchain_openai import ChatOpenAI
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_core.documents import Document
-from transformers import pipeline
-
-
 
 #user specified libraries
 from utils import kg_utils
-from utils.kg_utils import german_prompt
+from utils.kg_utils import german_prompt, german_med_prompt
 from config import config
+
+
+
 
 # Initialize Knowledge Graph & delete existing nodes and relationshiops
 kg = kg_utils.KnowledgeGraph()
@@ -21,42 +20,26 @@ kg.query("""
     MATCH (n)
     DETACH DELETE n""")
 
+
+
 #get llm settings from config
 load_dotenv('../config/keys.env', override=True)
 config = config.load_config()
 
-#OpenAI Models
-if(config['llm']=='gpt-4'):
+
+
+#Initialize OpenAI-based Graph Transformer
+if(config['llm_framework']=='openai'):
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-    llm = ChatOpenAI(temperature=0, model_name="gpt-4", api_key = OPENAI_API_KEY) #gpt-4-0125-preview
-    llm_transformer = LLMGraphTransformer(llm=llm, prompt=german_prompt)
-
-#LLama models
-if(config['llm']=='llama3' and config['local_modelling']):
-    if(config['modelling_location']=='local'):
-        llm = kg_utils.instantiate_llm()
-        llm_transformer = kg_utils.LLamaGraphTransformer(llm = llm, prompt=german_prompt)
-    elif (config['modelling_location'] == 'cluster'):
-        #set device etc if device CPU break
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if device == "cpu":
-            print("Detected device cpu")
-            raise Exception
-        print("Detected device:", device)
-        llm_transformer = pipeline("text-generation", model="meta-llama/Meta-Llama-3-8B", device_map='auto')
-
-if (config['llm'] == 'llama2' and config['local_modelling']):
-    if (config['modelling_location'] == 'local'):
-        llm = kg_utils.instantiate_llm()
-        llm_transformer = kg_utils.LLamaGraphTransformer(llm=llm, prompt=german_prompt)
-    elif (config['modelling_location'] == 'cluster'):
-        llm_transformer = pipeline("text-generation", model="meta-llama/Llama-2-7b-hf", device_map='auto')
+    llm = ChatOpenAI(temperature=0, model_name=config['llm'], api_key = OPENAI_API_KEY) #gpt-4-0125-preview
+    llm_transformer = LLMGraphTransformer(llm=llm, prompt=german_med_prompt)
 
 
-# Create Nodes for sections, pages, categories
-# Pages & Categories
+
+### GRAPH GENERATION ###
+# Generate Page & Category Nodes
 unique_categories = set()
-with open("../data/small_embedded_pages.csv") as pages_input:
+with open("../data_cluster/small_embedded_pages.csv") as pages_input: #note use ../data in local but data_cluster w/o ../ in cluster
     pages_reader = csv.DictReader(pages_input)
     processed_rows = 0
 
@@ -86,7 +69,7 @@ with open("../data/small_embedded_pages.csv") as pages_input:
     print(f"Created {len(unique_categories)} category-nodes")
 
 # Sections & Auto Nodes
-with open("../data/small_embedded_chunks.csv") as input_csv:
+with open("../data_cluster/small_embedded_chunks.csv") as input_csv:
     processed_rows = 0
     reader = csv.DictReader(input_csv)
     max_tries = 3
@@ -94,10 +77,10 @@ with open("../data/small_embedded_chunks.csv") as input_csv:
     #write in new nodes and relationships
     for row in reader:
         tries = 0
-        if processed_rows == 3:
+        if processed_rows == 2:
             break ##only for test
         processed_rows+=1
-        print(f"Processing section number: {processed_rows}")
+        print(f"Processing section number: {processed_rows}, Try: {tries}")
         row["cls_embed"] = ast.literal_eval(row["cls_embed"])
 
         #create node for each section
@@ -112,9 +95,7 @@ with open("../data/small_embedded_chunks.csv") as input_csv:
         for gdoc in graph_documents:
             for node in gdoc.nodes:
                 section_node_dict = {"section_id": row["section_id"], "node_id": node.id}
-                #page_node_dict = {"page_id": row["page_id"], "node_id": node.id}
                 kg.query(query=kg_utils.sect_auto_nodes_query, params=section_node_dict)
-                #kg.query(query=kg_utils.page_auto_nodes_query, params=page_node_dict)
 
     print(f"Finished: Processed {processed_rows} sections")
 

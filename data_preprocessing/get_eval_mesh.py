@@ -4,9 +4,9 @@ import json
 # Note not translated: All mesh:SCR_* -> possible translation necessary
 
 #Open files for reading and writing
-read_path = './data/MeSH_DE.jsonld'
-write_path_json = './data/mesh_de_categories.json'
-write_path_txt = './data/mesh_de_total.txt'
+read_path = './data/04_eval/MeSH_DE.jsonld'
+write_path_json = './04_eval/data/mesh_de_categories.json'
+write_path_txt = './04_eval/data/mesh_de_total.txt'
 
 with open(read_path, 'r') as read_file, \
         open(write_path_json, 'w') as write_file_json, \

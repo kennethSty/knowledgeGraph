@@ -1,5 +1,7 @@
-llm: llama2 #alternative: GPT4, GPT4-o
+llm: gpt-4 #alternatives: llama3, llama2 not working since models do not support structured output
 number_of_chunks: 10
-llama2: /Users/Kenneth/PycharmProjects/knowledgeGraph/data/models/llama-2-7b-chat.Q5_K_M.gguf
-llama3: /Users/Kenneth/PycharmProjects/knowledgeGraph/data/models/Meta-Llama-3-8B.Q5_K_M.gguf
-modelling_location: cluster
+llm_framework: openai
+llama2: /Users/Kenneth/PycharmProjects/knowledgeGraph/models/llama-2-7b-chat.Q5_K_M.gguf
+llama3: /Users/Kenneth/PycharmProjects/knowledgeGraph/models/Meta-Llama-3-8B.Q5_K_M.gguf
+modelling_location: local
+

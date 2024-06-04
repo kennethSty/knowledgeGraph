@@ -24,8 +24,8 @@ unique_pages_set = set()
 
 #open files for reading and writing csv output
 #note use ../ in local but data in cluster
-with open("../data/small_total_pages.csv") as input_csv, \
-    open("../data/small_embedded_pages.csv", "w") as output_csv:
+with open("../data/02_preprocessed/small_total_pages.csv") as input_csv, \
+    open("../data/03_model_input/small_embedded_pages.csv", "w") as output_csv:
     reader = csv.DictReader(input_csv)
     field_names = reader.fieldnames + ['text_to_embed', 'cls_embed']
     writer = csv.DictWriter(output_csv, field_names)

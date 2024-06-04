@@ -26,7 +26,7 @@ kg = Neo4jGraph(
 )
 
 #create Document objects for pages
-with open("../data/small_total_pages.csv") as input_csv, \
+with open("../data/02_preprocessed/small_total_pages.csv") as input_csv, \
      open("../data/skipped_pages_in_graph_transf.csv") as skipped_csv:
     reader = csv.DictReader(input_csv)
     processed_rows = 0
