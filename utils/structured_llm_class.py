@@ -10,8 +10,6 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 
 class StructuredLanguageModel(ChatOllama):
 
-
-
     def with_structured_output(
         self,
         schema: Optional[Union[Dict, Type[BaseModel]]] = None,

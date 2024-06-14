@@ -5,16 +5,17 @@ import ast
 from langchain_openai import ChatOpenAI
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_core.documents import Document
+from langchain_community.graphs.graph_document import Node
 from datetime import datetime
 
 #user specified libraries
 from utils import kg_utils
-from utils.kg_utils import german_prompt, german_med_prompt
+from utils.kg_utils import german_prompt, german_med_prompt, llm_checker_prompt
 from config import config
 
 
 
-def kg_construction(model_name, prompt, framework, until_chunk, prompt_name):
+def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, filter_node_stragy = True):
 
     # Initialize Knowledge Graph & delete existing nodes and relationshiops
     kg = kg_utils.KnowledgeGraph()
@@ -30,6 +31,7 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name):
         OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
         llm = ChatOpenAI(temperature=0, model_name=model_name, api_key = OPENAI_API_KEY) #gpt-4-0125-preview
         llm_transformer = LLMGraphTransformer(llm=llm, prompt=prompt)
+        checker_chain = kg_utils.init_llama_chain(model="llama3", prompt=llm_checker_prompt)
 
 
     ### GRAPH GENERATION ###
@@ -66,9 +68,11 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name):
 
     # Sections & Auto Nodes
     eval_date = datetime.today().strftime('%Y-%m-%d')
-    with open("../data/03_model_input/small_embedded_chunks.csv") as input_csv, \
-            open(f"../data/04_eval/{model_name}/{model_name}_{prompt_name}_{eval_date}_eval_result.txt", 'w') as eval_log:
+    with (open("../data/03_model_input/small_embedded_chunks.csv") as input_csv, \
+            open(f"../data/04_eval/{model_name}/{model_name}_{prompt_name}_{eval_date}_eval_result.txt", 'w') as eval_log):
         processed_rows = 0
+        total_auto_nodes = 0
+        total_auto_edges = 0
         successful_auto_generations = 0
         reader = csv.DictReader(input_csv)
 
@@ -94,6 +98,32 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name):
             while (not generation_success) and (tries<max_tries):
                 try:
                     graph_documents = llm_transformer.convert_to_graph_documents([doc])
+                    if filter_node_stragy:
+
+                        #use llama to filter out medical nodes
+                        filtered_nodes = []
+                        for node in graph_documents[0].nodes:
+                            check_result = checker_chain.invoke({"input": node.id})["text"].strip()
+                            if check_result == "True":
+                                filtered_nodes.append(Node(id=node.id, type=node.type))
+
+                        #keep only relationships to between medical nodes
+                        filtered_relationships = []
+                        unique_filtered_nodes = set([node.id for node in filtered_nodes])
+                        for relationship in graph_documents[0].relationships:
+                            if (relationship.source.id in unique_filtered_nodes and relationship.target.id in unique_filtered_nodes):
+                                filtered_relationships.append(relationship)
+
+                        #replace nodes and relationships with filtered versions
+                        #do so only if nodes were successfully filtered
+                        if(len(filtered_nodes)!=0):
+                            eval_log.write(f"Node Filter Success \n")
+                            graph_documents[0].nodes = filtered_nodes
+                            graph_documents[0].relationships = filtered_relationships
+                        else:
+                            continue
+
+                    #upload graph documents into neo4j dbms
                     kg.add_graph_documents(graph_documents=list(graph_documents))
                     generation_success = True
                     print(f"Success at try: {tries}")
@@ -107,6 +137,9 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name):
                 continue
             else:
                 eval_log.write(f"GENERATION SUCCESS: YES, Section: {row['section_id']} \n")
+                eval_log.write(f"Num. of autom. detected nodes: {len(graph_documents[0].nodes)} \n")
+                eval_log.write(f"Num. of autom. detected rel. btw. auto det. nodes: {len(graph_documents[0].relationships)} \n")
+                eval_log.write("------------------ \n")
                 successful_auto_generations+=1
 
             #connect auto detected node to each section and corresp. page
@@ -151,7 +184,8 @@ if config['prompt']=='german_med_prompt':
 kg_construction(model_name=config['llm'],
                 prompt=prompt,
                 until_chunk=config['until_chunk'],
-                framework=config['llm_framework'])"""
+                framework=config['llm_framework'],
+                prompt_name="german_med_prompt")"""
 
 
 

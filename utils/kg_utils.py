@@ -5,6 +5,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.llms import LlamaCpp
 from langchain_core.language_models import BaseLanguageModel
 from langchain_experimental.graph_transformers import LLMGraphTransformer
+from langchain_core.prompts import PromptTemplate
+from langchain.chains import LLMChain
 
 #user native package
 from config import config
@@ -30,9 +32,15 @@ def instantiate_llm(temperature = 0,
         n_gpu_layers=n_gpu_layers,
         n_batch=n_batch,
         verbose=verbose,
-        grammar_path="/Users/Kenneth/PycharmProjects/knowledgeGraph/models/grammar.gbnf"# Verbose is required to pass to the callback manager
         )
+    llm.client.verbose = False
+    print("\n\n\n")
     return llm
+
+def init_llama_chain(model, prompt):
+    llm = instantiate_llm(model=model)
+    chain = LLMChain(prompt=prompt, llm=llm)
+    return chain
 
 
 class LLamaGraphTransformer(LLMGraphTransformer):
@@ -147,6 +155,32 @@ RETURN count(r)
 """
 
 # graph transformer prompt
+##llm checker prompt
+llm_checker_system_text = """
+    Deine Aufgabe ist es, zu entscheiden, ob ein gegebenen Begriff einen medizinischen Bezug hat oder nicht.
+    Gebe "True" aus, wenn der Begriff medizinisch ist und "False" wenn nicht. Achte dabei darauf, dass auch umgangssprachliche Begriffe einen medizinischen Bezug haben können.
+    Gebe ausschließlich True oder False aus und nichts anders. Gebe keine Erläuterungen für deine Entscheidung. 
+    """
+
+llm_checker_user_text = """
+    Hat folgender Begriff einen medizinischen Bezug: {input}?
+    """
+
+llama_template = """
+        <|begin_of_text|>
+        <|start_header_id|>system<|end_header_id|>
+        {system_prompt}
+        <|eot_id|>
+        <|start_header_id|>user<|end_header_id|>
+        {user_prompt}
+        <|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>
+        """
+llm_checker_prompt = PromptTemplate.from_template(llama_template.format(system_prompt = llm_checker_system_text,
+                                                          user_prompt = llm_checker_user_text))
+
+
+## Node Detection Prompts
 med_system_prompt = (
 "# Anweisungen für die Erstellung eines medizinischen Wissensgraphen mit GPT-4\n"
 "## 1. Überblick\n"
@@ -231,7 +265,7 @@ german_med_prompt = ChatPromptTemplate.from_messages(
             "human",
             (
                 "Tipp: Stelle sicher, dass Du in dem richtigen Format antwortest."
-                "Gebe keinerlei Erklärungen oder Erläuterungen aus. "
+                "Gebe keinerlei Erklärungen oder Erläuterungen aus."
                 "Sämtliche Bezeichnungen von Knoten und Beziehungen sollen in deutscher Sprache sein."
                 "Verwende das angegebene Format,"
                 "um Informationen aus der folgenden Eingabe zu extrahieren: {input}"
@@ -239,6 +273,23 @@ german_med_prompt = ChatPromptTemplate.from_messages(
         ),
     ]
 )
+
+
+
+
+med_lama_system = ("""
+    Gegeben ist ein unstrukturierter Text. Deine Aufgabe ist es, alle relevanten medizinischen Begriffe und verwandten Konzepte aus dem Text in eine Liste zu extrahieren.
+    Input: "Heute habe ich ein Aspirin genommen",
+    Output: ["Aspirin"]
+    """)
+
+
+med_lama_user = ("Tipp: Stelle sicher, dass Du in dem Format einer python Liste antwortest."
+                "Extrahiere die Liste medizinischer Begrife aus folgendem Input: {input}")
+
+med_llama_prompt = PromptTemplate.from_template(llama_template.format(system_prompt = med_system_prompt,
+                                                          user_prompt = med_lama_user))
+
 
 
 
