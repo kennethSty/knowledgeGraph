@@ -30,7 +30,10 @@ for eval_comb in eval_settings:
                                     framework=config['llm_framework'],
                                     until_chunk=config['until_chunk'],
                                     prompt_name=eval_comb['prompt'],
-                                    filter_node_stragy=eval_comb['filter_strategy'])
+                                    filter_node_stragy=eval_comb['filter_strategy'],
+                                    kg_construction_section_path =config['kg_construction_section_path'],
+                                    kg_construction_page_path = config['kg_construction_page_path'])
+
     if construction_success:
         print(f"Start Evaluation with model: {eval_comb['model_name']}, {eval_comb['prompt']} and filter={eval_comb['filter_strategy']}")
         evaluate_graph_transformer(model_name=eval_comb['model_name'],

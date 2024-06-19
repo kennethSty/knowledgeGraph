@@ -6,4 +6,6 @@ llama3: /Users/Kenneth/PycharmProjects/knowledgeGraph/models/Llama-3-SauerkrautL
 modelling_location: local
 prompt: german_med_prompt
 until_chunk: 2
+kg_construction_section_path: ../data/03_model_input/eval_embedded_chunks.csv
+kg_construction_page_path: ../data/03_model_input/eval_embedded_pages.csv
 

@@ -11,9 +11,10 @@ preprocess_utils.increase_csv_maxsize()
 nlp = spacy.load("de_core_news_sm")
 
 #Note: cluster its data/somepath and for local it is ../data/somepath
-with open("../data/00_raw/pages_until_sroff_10.csv") as input_csv, \
-        open("../data/02_preprocessed/small_chunked_pages.csv", "w") as paragraph_output_csv, \
-        open("../data/02_preprocessed/small_total_pages.csv", "w") as page_output_csv:
+#note: this is path for normal pipeline run: ../data/00_raw/new_pages_until_sroff_10.csv
+with open("../data/00_raw/eval_pages_raw.csv") as input_csv, \
+        open("../data/02_preprocessed/eval_pages_chunked.csv", "w") as paragraph_output_csv, \
+        open("../data/02_preprocessed/eval_pages_total.csv", "w") as page_output_csv:
     reader = csv.DictReader(input_csv)
 
     fieldnames_paragraph_writer = ["page_title", "page_id", "section", "section_title", "section_id", "section_counter"]
