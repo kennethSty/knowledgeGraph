@@ -69,7 +69,7 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
     # Sections & Auto Nodes
     eval_date = datetime.today().strftime('%Y-%m-%d')
     with (open(kg_construction_section_path) as input_csv, \
-            open(f"../data/04_eval/{model_name}/{model_name}_{prompt_name}_{eval_date}_eval_result.txt", 'w') as eval_log):
+            open(f"../data/04_eval/{model_name}/{model_name}_{prompt_name}_{eval_date}_filter:{filter_node_stragy}_kgconstruction_result.txt", 'w') as eval_log):
         processed_rows = 0
         total_auto_nodes = 0
         total_auto_edges = 0
@@ -158,6 +158,8 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
         num_page_cat_rels = kg.query(query=kg_utils.page_cat_edge_query)
         num_first_rels = kg.query(query=kg_utils.page_first_sect)
 
+        #save the graph as json
+        kg.export_to_json(f"../data/05_graphs/{model_name}/{model_name}_{prompt_name}_{eval_date}_graph.json")
         eval_log.write(f"Created {num_sect_page_rels} relationships btw. sections and pages \n")
         eval_log.write(f"Created {num_page_cat_rels} relationships btw. pages and categories \n")
         eval_log.write(f"Created {num_first_rels} relationships of pages to their first chunks \n")

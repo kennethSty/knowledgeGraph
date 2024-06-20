@@ -73,6 +73,18 @@ class KnowledgeGraph(Neo4jGraph):
 
         print(f"Graph database initialized: {self.NEO4J_DATABASE}")
 
+    def export_to_json(self, filename):
+        # Use the streaming option to export the data
+        result = self.query("CALL apoc.export.json.all(null, {useTypes:true, stream: true}) YIELD data RETURN data")
+
+        # Extract the streamed data and save to a file
+        with open(filename, 'w') as f:
+            for record in result:
+                f.write(record['data'])
+    def import_from_json(self, filename):
+
+        # Use the streaming option to import the data
+        self.query(f"CALL apoc.import.json('{filename}')")
 
 
 # cypher statements for creating nodes

@@ -8,9 +8,9 @@ config = config.load_config()
 
 # Create evaluation settings mesh
 eval_settings = []
-models = ['gpt-4', 'gpt-4o', 'gpt-3.5-turbo']
-prompt_strategies = ['german_prompt', 'german_med_prompt']
-node_filter_strategies = [True, False]
+models = ['gpt-4', 'gpt-3.5-turbo']
+prompt_strategies = ['german_med_prompt']
+node_filter_strategies = [True]
 
 for model in models:
     for prompt in prompt_strategies:
@@ -33,6 +33,7 @@ for eval_comb in eval_settings:
                                     filter_node_stragy=eval_comb['filter_strategy'],
                                     kg_construction_section_path =config['kg_construction_section_path'],
                                     kg_construction_page_path = config['kg_construction_page_path'])
+
 
     if construction_success:
         print(f"Start Evaluation with model: {eval_comb['model_name']}, {eval_comb['prompt']} and filter={eval_comb['filter_strategy']}")
