@@ -318,6 +318,8 @@ german_med_prompt = ChatPromptTemplate.from_messages(
 
 
 
+## Legacy Prompts
+
 med_lama_system = ("""
     Gegeben ist ein unstrukturierter Text. Deine Aufgabe ist es, alle relevanten medizinischen Begriffe und verwandten Konzepte aus dem Text in eine Liste zu extrahieren.
     Input: "Heute habe ich ein Aspirin genommen",

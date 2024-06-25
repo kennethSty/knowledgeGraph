@@ -80,6 +80,7 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
         max_tries = 3
         for row in reader:
             #stop creating new nodes after specified chunk
+            section_start_time = time.time()
             if processed_rows == until_chunk:
                 break
             processed_rows += 1
@@ -121,7 +122,7 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
                         if(len(filtered_nodes)!=0):
 
                             with open(f"../data/04_eval/{model_name}/{model_name}_{prompt_name}_{eval_date}_filter:{filter_node_stragy}_nodes_filtered_out.txt",
-                            'w') as filtered_out_file:
+                            'a') as filtered_out_file:
                                 #document node filter result
                                 nodes_filtered_out = []
                                 for node in graph_documents[0].nodes:
@@ -148,11 +149,15 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
                 eval_log.write(f"GENERATION SUCCESS: NO,  Section: {row['section_id']} \n")
                 continue
             else:
+                section_end_time = time.time()
+                proc_time_section = section_end_time - section_start_time
                 eval_log.write(f"GENERATION SUCCESS: YES, Section: {row['section_id']} \n")
+                eval_log.write(f"Section kg construction took: {proc_time_section} seconds")
                 eval_log.write(f"Num. of autom. detected nodes: {len(graph_documents[0].nodes)} \n")
                 eval_log.write(f"Num. of autom. detected rel. btw. auto det. nodes: {len(graph_documents[0].relationships)} \n")
                 eval_log.write("------------------ \n")
                 successful_auto_generations+=1
+
 
             #connect auto detected node to each section and corresp. page
             for gdoc in graph_documents:
@@ -185,7 +190,7 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
         eval_log.write(f"Created {num_sect_page_rels} relationships btw. sections and pages \n")
         eval_log.write(f"Created {num_page_cat_rels} relationships btw. pages and categories \n")
         eval_log.write(f"Created {num_first_rels} relationships of pages to their first chunks \n")
-        eval_log.write(f"KG Construction took {elapsed_time} seconds \n")
+        eval_log.write(f"Full KG Construction took {elapsed_time} seconds \n")
 
     if successful_auto_generations != 0:
         return True

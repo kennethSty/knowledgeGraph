@@ -25,23 +25,23 @@ for eval_comb in eval_settings:
         prompt = german_med_prompt
 
     print(f"Start Construction with model:{eval_comb['model_name']}, {eval_comb['prompt']} and filter={eval_comb['filter_strategy']}")
-    construction_success = kg_construction.kg_construction(model_name=eval_comb['model_name'],
-                                    prompt=prompt,
-                                    framework=config['llm_framework'],
-                                    until_chunk=config['until_chunk'],
-                                    prompt_name=eval_comb['prompt'],
-                                    filter_node_stragy=eval_comb['filter_strategy'],
-                                    kg_construction_section_path =config['kg_construction_section_path'],
-                                    kg_construction_page_path = config['kg_construction_page_path'])
+    #construction_success = kg_construction.kg_construction(model_name=eval_comb['model_name'],
+    #                                prompt=prompt,
+    #                                framework=config['llm_framework'],
+    #                                until_chunk=config['until_chunk'],
+    #                                prompt_name=eval_comb['prompt'],
+    #                                filter_node_stragy=eval_comb['filter_strategy'],
+    #                                kg_construction_section_path =config['kg_construction_section_path'],
+    #                                kg_construction_page_path = config['kg_construction_page_path'])
 
 
-    if construction_success:
-        print(f"Start Evaluation with model: {eval_comb['model_name']}, {eval_comb['prompt']} and filter={eval_comb['filter_strategy']}")
-        evaluate_graph_transformer(model_name=eval_comb['model_name'],
-                                   prompt_strategy=eval_comb['prompt'],
-                                   filter_strategy = eval_comb['filter_strategy'])
-    else:
-        continue
+    #if construction_success:
+    print(f"Start Evaluation with model: {eval_comb['model_name']}, {eval_comb['prompt']} and filter={eval_comb['filter_strategy']}")
+    evaluate_graph_transformer(model_name=eval_comb['model_name'],
+                               prompt_strategy=eval_comb['prompt'],
+                               filter_strategy = eval_comb['filter_strategy'])
+    #else:
+    #    continue
 
 
 
