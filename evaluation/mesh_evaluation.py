@@ -12,9 +12,9 @@ def evaluate_graph_transformer(model_name, prompt_strategy, filter_strategy):
         filter_activation = "filter_off"
 
     with open("../data/04_eval/mesh_de_total.txt", 'r') as eval_file, \
-        open(f"../data/04_eval/{model_name}/{model_name}_{prompt_strategy}_{eval_date}_{filter_activation}eval_result.txt", 'w') as eval_result, \
-        open(f"../data/04_eval/{model_name}/{model_name}_{prompt_strategy}_{eval_date}_{filter_activation}matched_nodes.txt",'w') as matched_node_txt, \
-        open(f"../data/04_eval/{model_name}/{model_name}_{prompt_strategy}_{eval_date}_{filter_activation}unmatched_nodes.txt", 'w') as unmatched_node_txt:
+        open(f"../data/04_eval/{model_name}/{model_name}_{prompt_strategy}_{eval_date}_{filter_activation}_eval_result.txt", 'w') as eval_result, \
+        open(f"../data/04_eval/{model_name}/{model_name}_{prompt_strategy}_{eval_date}_{filter_activation}_matched_nodes.txt",'w') as matched_node_txt, \
+        open(f"../data/04_eval/{model_name}/{model_name}_{prompt_strategy}_{eval_date}_{filter_activation}_unmatched_nodes.txt", 'w') as unmatched_node_txt:
         total_mesh_string = eval_file.read()
         total_mesh = ast.literal_eval(total_mesh_string)
         total_mesh_set = set(total_mesh)
@@ -49,17 +49,17 @@ def evaluate_graph_transformer(model_name, prompt_strategy, filter_strategy):
 
         # Write result to files
         if node_count != 0:
-            print(f"Percentage of matched auto-generated-nodes: {(matches/node_count)*100} ")
+            print(f"Percentage of matched auto-generated-nodes: {(matches/node_count)*100} \n")
             eval_result.write(f"Percentage of matched auto-generated-nodes: {(matches/node_count)*100} \n")
-            eval_result.write((f"number of auto-gen nodes: {node_count}"))
-            eval_result.write((f"number of auto-gen matched nodes: {matches}"))
-            unmatched_node_txt.write(str(unmatched_nodes))
-            matched_node_txt.write(str(matched_nodes))
+            eval_result.write((f"number of auto-gen nodes: {node_count} \n"))
+            eval_result.write((f"number of auto-gen matched nodes: {matches} \n"))
+            unmatched_node_txt.write(str(unmatched_nodes) + "\n")
+            matched_node_txt.write(str(matched_nodes) + "\n")
         else:
-            print(f"No nodes were auto-generated")
-            eval_result.write("No nodes were auto-generated")
-            unmatched_node_txt.write("No nodes were auto-generated")
-            matched_node_txt.write("No nodes were auto-generated")
+            print(f"No nodes were auto-generated \n")
+            eval_result.write("No nodes were auto-generated \n")
+            unmatched_node_txt.write("No nodes were auto-generated \n")
+            matched_node_txt.write("No nodes were auto-generated \n")
 
 
 ## Outcomment to run evaluation with latest config settings

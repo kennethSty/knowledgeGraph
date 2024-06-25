@@ -5,5 +5,5 @@ kg.export_to_json("json_Neo4j.json")
 kg.query("""
         MATCH (n)
         DETACH DELETE n""")
-kg.import_from_json("/Users/Kenneth/PycharmProjects/knowledgeGraph/graph_generation/json_Neo4j.json")
+kg.import_from_json("/Users/Kenneth/PycharmProjects/knowledgeGraph/data/05_graphs/gpt-3.5-turbo/gpt-3.5-turbo_german_med_prompt_2024-06-25_graph.json")
 

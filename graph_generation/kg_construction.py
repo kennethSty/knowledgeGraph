@@ -7,6 +7,7 @@ from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_core.documents import Document
 from langchain_community.graphs.graph_document import Node
 from datetime import datetime
+import time
 
 #user specified libraries
 from utils import kg_utils
@@ -15,9 +16,10 @@ from config import config
 
 
 
-def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, filter_node_stragy = True, kg_construction_section_path = "../data/03_model_input/small_embedded_chunks.csv", kg_construction_page_path = "../data/03_model_input/small_embedded_pages.csv"):
+def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, filter_node_stragy = True, kg_construction_section_path = "../data/03_model_input/eval_embedded_chunks.csv", kg_construction_page_path = "../data/03_model_input/eval_embedded_pages.csv"):
 
     # Initialize Knowledge Graph & delete existing nodes and relationshiops
+    start_time = time.time()
     kg = kg_utils.KnowledgeGraph()
     kg.query("""
         MATCH (n)
@@ -71,8 +73,6 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
     with (open(kg_construction_section_path) as input_csv, \
             open(f"../data/04_eval/{model_name}/{model_name}_{prompt_name}_{eval_date}_filter:{filter_node_stragy}_kgconstruction_result.txt", 'w') as eval_log):
         processed_rows = 0
-        total_auto_nodes = 0
-        total_auto_edges = 0
         successful_auto_generations = 0
         reader = csv.DictReader(input_csv)
 
@@ -96,8 +96,10 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
             #Start max_tries attempts to auto-generate nodes
             print(f"Processing Section: {processed_rows}")
             while (not generation_success) and (tries<max_tries):
+
                 try:
                     graph_documents = llm_transformer.convert_to_graph_documents([doc])
+
                     if filter_node_stragy:
 
                         #use llama to filter out medical nodes
@@ -107,7 +109,7 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
                             if check_result == "True":
                                 filtered_nodes.append(Node(id=node.id, type=node.type))
 
-                        #keep only relationships to between medical nodes
+                        #keep only relationships between filtered nodes
                         filtered_relationships = []
                         unique_filtered_nodes = set([node.id for node in filtered_nodes])
                         for relationship in graph_documents[0].relationships:
@@ -117,7 +119,17 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
                         #replace nodes and relationships with filtered versions
                         #do so only if nodes were successfully filtered
                         if(len(filtered_nodes)!=0):
+
+                            with open(f"../data/04_eval/{model_name}/{model_name}_{prompt_name}_{eval_date}_filter:{filter_node_stragy}_nodes_filtered_out.txt",
+                            'w') as filtered_out_file:
+                                #document node filter result
+                                nodes_filtered_out = []
+                                for node in graph_documents[0].nodes:
+                                    if node.id not in unique_filtered_nodes:
+                                        nodes_filtered_out.append(node.id)
+                                filtered_out_file.write(f"Section {row['section_id']}: " + str(nodes_filtered_out) + "\n")
                             eval_log.write(f"Node Filter Success \n")
+                            eval_log.write(f"Nodes_after_filter / nodes_prev_filter: {len(filtered_nodes)} / {len(graph_documents[0].nodes)} \n")
                             graph_documents[0].nodes = filtered_nodes
                             graph_documents[0].relationships = filtered_relationships
                         else:
@@ -156,13 +168,24 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
         # Connect sections, pages, categories
         num_sect_page_rels = kg.query(query=kg_utils.sect_page_edge_query)
         num_page_cat_rels = kg.query(query=kg_utils.page_cat_edge_query)
-        num_first_rels = kg.query(query=kg_utils.page_first_sect)
+        num_first_rels = kg.query(query=kg_utils.page_first_sect, )
+        kg.query(query=kg_utils.sect_sect_edge_query)
 
         #save the graph as json
-        kg.export_to_json(f"../data/05_graphs/{model_name}/{model_name}_{prompt_name}_{eval_date}_graph.json")
+        try:
+            kg.export_to_json(f"../data/05_graphs/{model_name}/{model_name}_{prompt_name}_{eval_date}_graph.json")
+            eval_log.write(f"Graph Exported \n")
+            print("Graph Exported")
+        except:
+            eval_log.write(f"Graph not exported \n")
+
+        #write logging files
+        end_time = time.time()
+        elapsed_time = end_time-start_time
         eval_log.write(f"Created {num_sect_page_rels} relationships btw. sections and pages \n")
         eval_log.write(f"Created {num_page_cat_rels} relationships btw. pages and categories \n")
         eval_log.write(f"Created {num_first_rels} relationships of pages to their first chunks \n")
+        eval_log.write(f"KG Construction took {elapsed_time} seconds \n")
 
     if successful_auto_generations != 0:
         return True

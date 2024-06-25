@@ -7,6 +7,8 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_core.prompts import PromptTemplate
 from langchain.chains import LLMChain
+from langchain_community.graphs.graph_document import Node, Relationship
+import json
 
 #user native package
 from config import config
@@ -73,6 +75,19 @@ class KnowledgeGraph(Neo4jGraph):
 
         print(f"Graph database initialized: {self.NEO4J_DATABASE}")
 
+    def detect_labels_in_json(self, filename):
+        labels = set()
+        with open(filename, 'r') as file:
+            for line in file:
+                record = json.loads(line.strip())
+                if record['type'] == 'node':
+                    labels.update(record['labels'])
+        return labels
+
+    def create_constraints_for_labels(self, labels):
+        for label in labels:
+            self.query(f"CREATE CONSTRAINT IF NOT EXISTS FOR (n:{label}) REQUIRE n.neo4jImportId IS UNIQUE")
+
     def export_to_json(self, filename):
         # Use the streaming option to export the data
         result = self.query("CALL apoc.export.json.all(null, {useTypes:true, stream: true}) YIELD data RETURN data")
@@ -81,9 +96,15 @@ class KnowledgeGraph(Neo4jGraph):
         with open(filename, 'w') as f:
             for record in result:
                 f.write(record['data'])
-    def import_from_json(self, filename):
 
-        # Use the streaming option to import the data
+    def import_from_json(self, filename):
+        # Detect all labels in the JSON file
+        labels = self.detect_labels_in_json(filename)
+
+        # Create constraints for all detected labels
+        self.create_constraints_for_labels(labels)
+
+        # Use the APOC procedure to import the data
         self.query(f"CALL apoc.import.json('{filename}')")
 
 
@@ -133,17 +154,25 @@ RETURN count(r)
 
 # creates connection "NEXT" between subsequent chunks (like linked list)
 sect_sect_edge_query="""
-  MATCH (from_same_page:Section)
-  WHERE from_same_page.page_id = $page_id
-  WITH from_same_page
-    ORDER BY from_same_page.section_counter ASC
-  WITH collect(from_same_page) as section_list
-    CALL apoc.nodes.link(
+    MATCH (s:Section)
+    WITH DISTINCT s.page_id AS page_id
+    CALL {
+      WITH page_id
+      MATCH (from_same_page:Section)
+      WHERE from_same_page.page_id = page_id
+      WITH from_same_page
+      ORDER BY from_same_page.section_counter ASC
+      WITH collect(from_same_page) as section_list
+      CALL apoc.nodes.link(
         section_list, 
         "NEXT", 
         {avoidDuplicates: true}
-    )
-  RETURN size(section_list)
+      )
+      RETURN 1 AS ignored
+    }
+    RETURN null
+
+    
 """
 
 page_first_sect = """

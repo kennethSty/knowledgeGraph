@@ -8,7 +8,7 @@ config = config.load_config()
 
 # Create evaluation settings mesh
 eval_settings = []
-models = ['gpt-4', 'gpt-3.5-turbo']
+models = ['gpt-3.5-turbo']
 prompt_strategies = ['german_med_prompt']
 node_filter_strategies = [True]
 
