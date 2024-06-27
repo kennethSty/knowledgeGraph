@@ -63,17 +63,17 @@ def evaluate_graph_transformer(model_name, prompt_strategy, filter_strategy):
                 print(f"Check Node with LLM")
                 print(f"Number of API calls: {api_call}")
                 #if term not directly in mesh, check if there is a synonym or a heavily related term
-                similar_mesh_terms = vector_db.similarity_search(node.lower())
+                similar_mesh_terms = vector_db.similarity_search(node)
                 similar_mesh_terms = [term.page_content for term in similar_mesh_terms]
                 # let llm decide if the node name is strongly related to at least one of the similar mesh terms
                 node_in_mesh = model_eval_chain.invoke(
                     {
-                        "input_term": node.lower,
+                        "input_term": node,
                         "related_terms": str(similar_mesh_terms)
                     }
                 )
                 if ast.literal_eval(node_in_mesh.content):
-                    matches + 1
+                    matches += 1
                     matched_nodes.append(node)
                 else:
                     unmatched_nodes.append(node)
