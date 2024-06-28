@@ -1,4 +1,8 @@
 # WikiMedGraph
+Automatic knowledge graph construction based on German Wikipedia pages. 
+![example graph](/good_pipe.png)
+
+
 ## Contributor
 -  [Kenneth Styppa](mailto:kenneth.styppa@I b.de) (GitHub alias 'KennyLoRI' and 'Kenneth Styppa')
 
