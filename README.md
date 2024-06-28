@@ -1,10 +1,10 @@
 # WikiMedGraph
 Automatic knowledge graph construction based on German Wikipedia pages. 
-![example graph](/good_pipe.png)
 
+-------------
+## Example Result
+![example graph](/pipe_good.png)
 
-## Contributor
--  [Kenneth Styppa](mailto:kenneth.styppa@I b.de) (GitHub alias 'KennyLoRI' and 'Kenneth Styppa')
 
 ## Overview
 This project utilizes a combination of Langchain, ChromaDB, Neo4j and llama.cpp together with the OpenAI API as well as the Wikipedia API to create a pipeline for automated knowledge-graph construction based on Wikipedia articles. The project is structured into modular scripts that each perform a key component of the overall pipeline. These include: 
