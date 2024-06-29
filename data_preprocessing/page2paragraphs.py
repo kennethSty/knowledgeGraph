@@ -11,13 +11,14 @@ preprocess_utils.increase_csv_maxsize()
 nlp = spacy.load("de_core_news_sm")
 
 #Note: cluster its data/somepath and for local it is ../data/somepath
-with open("../data/pages_until_sroff_10.csv") as input_csv, \
-        open("../data/small_chunked_pages.csv", "w") as paragraph_output_csv, \
-        open("../data/small_total_pages.csv", "w") as page_output_csv:
+#note: this is path for normal pipeline run: ../data/00_raw/new_pages_until_sroff_10.csv
+with open("../data/00_raw/eval_pages_raw.csv") as input_csv, \
+        open("../data/02_preprocessed/eval_pages_chunked.csv", "w") as paragraph_output_csv, \
+        open("../data/02_preprocessed/eval_pages_total.csv", "w") as page_output_csv:
     reader = csv.DictReader(input_csv)
 
     fieldnames_paragraph_writer = ["page_title", "page_id", "section", "section_title", "section_id", "section_counter"]
-    fieldnames_page_writer = ["title", "page_id", "links", "categories", "summary", "section_ids"]
+    fieldnames_page_writer = ["title", "page_id", "links", "categories", "summary", "section_ids", "content"]
 
     paragraph_writer = csv.DictWriter(paragraph_output_csv, fieldnames=fieldnames_paragraph_writer)
     page_writer = csv.DictWriter(page_output_csv, fieldnames=fieldnames_page_writer)
@@ -35,7 +36,7 @@ with open("../data/pages_until_sroff_10.csv") as input_csv, \
     for row in reader:
         #extract sections
         sections, head_section_titles = preprocess_utils.extract_sections(row["content"])
-        del row["content"]
+        row["content"]
 
         #rename and delete to free memory
         row["page_id"] = row["pageid"]

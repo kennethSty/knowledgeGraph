@@ -1,5 +1,14 @@
 # Ignore csv files
 *.csv
 
+# Ignore json files
+*.jsonld
+*.json
+*.txt
+*.gguf
+
 #ignore .env files
 *.env
+
+#ignore vector store
+chroma_store

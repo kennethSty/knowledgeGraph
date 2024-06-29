@@ -6,7 +6,7 @@ import os
 from langchain_openai import OpenAIEmbeddings
 
 # Env Vars
-load_dotenv("../graph_generation/keys.env") #in local ../graph_generation
+load_dotenv("../config/keys.env") #in local ../graph_generation
 HF_TOKEN = os.getenv("HF_TOKEN")
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
@@ -55,6 +55,7 @@ class OpenAIEmbedd:
     def embed(self, batch: list):
         embedding = self.embedding_model.embed_documents(batch)
         return embedding
+
 
 
 
