@@ -49,8 +49,8 @@ The corresponding file contained 96.745 unique terms consisting of 165.868 words
 ### Pipeline Overview
 The following section lists details on implementing an automated system to generate a knowledge graph from unstructured, extracted German Wikipedia Pages. Thereby, the pipeline can be categorized into three stages. 1) the data extraction & preprocessing stage 2) the knowledge graph construction stage and 3) the evaluation stage. Although in the provided repository each stage can be executed on its own, for creating the graphs reported here, a successive execution was necessary in the above order. 
 #### Data Preprocessing
-![Preprocessing](preprocessing.png)
 The data extraction and preprocessing stage can again be split into two subtasks. One subtask involves several steps to extract and prepare the raw Wikipedia data for embedding and subsequent knowledge graph construction. The other subtask involves preparing the Medical Subject Headings file for later evaluation. 
+![Preprocessing](preprocessing.png)
 
 **Wikipedia Data Preprocessing:**
 
