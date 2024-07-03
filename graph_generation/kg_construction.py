@@ -17,6 +17,20 @@ from config import config
 
 
 def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, filter_node_stragy = True, kg_construction_section_path = "../data/03_model_input/eval_embedded_chunks.csv", kg_construction_page_path = "../data/03_model_input/eval_embedded_pages.csv"):
+    """
+    Function to generate the knowledge graph
+    :param model_name: The model name - only OpenAI based models
+    :param prompt: The actual prompt template
+    :param framework: The framework used for generating the grpah. At the moment only openai
+    :param until_chunk: Until to which chunk of the chunked pages graph data should be extracted. E.g. If the script rea
+    :param prompt_name: Name of the prompt used (needed for writing evaluation scripts)
+    :param filter_node_stragy: Boolean indicating whether the Llama3 Sauerkraut LLM should be used to filter out nodes not relevant to the specified medical context.
+    :param kg_construction_section_path: Path of the chunked pages from whose text the knowledge grpah data should be extracted.
+    :param kg_construction_page_path: Path to the pages to which the sections belong in order to create overall page nodes.
+    :return: Void - writes result directly into Neo4j
+
+    Note: In order for the function to successfully create a graph the local neo4j server and its DBMS has to be running in the background. This can be achieved by opening the desktop application and "starting" the respective DBMS.
+    """
 
     # Initialize Knowledge Graph & delete existing nodes and relationshiops
     start_time = time.time()
@@ -203,19 +217,6 @@ def kg_construction(model_name, prompt, framework, until_chunk, prompt_name, fil
 
 
 
-
-##Outcomment to run kg_construction with settings in config
-"""config = config.load_config()
-if config['prompt']=='german_prompt':
-    prompt = german_prompt
-if config['prompt']=='german_med_prompt':
-    prompt = german_med_prompt
-
-kg_construction(model_name=config['llm'],
-                prompt=prompt,
-                until_chunk=config['until_chunk'],
-                framework=config['llm_framework'],
-                prompt_name="german_med_prompt")"""
 
 
 

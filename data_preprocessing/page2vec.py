@@ -11,7 +11,7 @@ print("Detected device:", device)
 #model = embed_utils.GerMedBert(device)
 #print(f"Model on device: {model.device}")
 #OpenAI model
-model = embed_utils.OpenAIEmbedd()
+model = embed_utils.OpenAIEmbedd() #use oder model with GerMedBert class
 
 #outer loop variables for embedding loop
 processed_rows = 0

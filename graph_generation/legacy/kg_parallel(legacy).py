@@ -11,7 +11,7 @@ import os
 from utils.kg_utils import german_prompt
 
 #load env variables
-load_dotenv('../config/keys.env', override=True)
+load_dotenv('../../config/keys.env', override=True)
 NEO4J_URI = os.getenv('NEO4J_URL')
 NEO4J_USERNAME = os.getenv('NEO4J_USERNAME')
 NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')
@@ -26,7 +26,7 @@ kg = Neo4jGraph(
 )
 
 #create Document objects for pages
-with open("../data/02_preprocessed/small_total_pages.csv") as input_csv, \
+with open("../../data/02_preprocessed/small_total_pages.csv") as input_csv, \
      open("../data/skipped_pages_in_graph_transf.csv") as skipped_csv:
     reader = csv.DictReader(input_csv)
     processed_rows = 0

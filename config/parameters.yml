@@ -1,11 +1,11 @@
-llm: gpt-4 #alternatives: llama3, llama2 not working since models do not support structured output
-number_of_chunks: 10
-llm_framework: openai
+llm: gpt-3.5-turbo #model used for extracting graph information
+llm_framework: openai #currently only openAI supported
 llama2: /Users/Kenneth/PycharmProjects/knowledgeGraph/models/llama-2-7b-chat.Q5_K_M.gguf
 llama3: /Users/Kenneth/PycharmProjects/knowledgeGraph/models/Llama-3-SauerkrautLM-8b-Instruct-Q5_K_M.gguf
-modelling_location: local
-prompt: german_med_prompt
-until_chunk: 33
+modelling_location: local #Legacy: only needed for cluster script
+prompt: german_med_prompt #Prompt used for extracting graph information
+until_chunk: 33 #Number of sections processed to detect graph information
 kg_construction_section_path: ../data/04_eval/selected_eval_embedded_chunks.csv
 kg_construction_page_path: ../data/04_eval/selected_eval_embedded_pages.csv
+filter_node_strategy: True # whether Llama3 Sauerkraut is used for filtering nodes for medical context
 
