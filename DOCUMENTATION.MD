@@ -47,7 +47,10 @@ The corresponding file contained 96.745 unique terms consisting of 165.868 words
 
 
 ### Pipeline Overview
+#### Data Preprocessing
+![Preprocessing](preprocessing.png)
 #### Knowledge Graph Construction Pipeline
+![Graph Construction](kg_construction.png)
 
 ## Implementation Details  
 ### Knowledge Graph Construction Pipeline
