@@ -97,7 +97,7 @@ Note: this configuration allows Neo4j to read any file on your system, but for i
 11. **API Setup:**
 Place your API keys and your Neo4j database credentials in `config/keys.env` in the following format: 
   ```bash
-  NEO4J_URL=bolt://localhost:7687
+  NEO4J_URL=bolt://localhost:SOME_NUMBER
   NEO4J_USERNAME=
   NEO4J_PASSWORD=
   OPENAI_API_KEY=
