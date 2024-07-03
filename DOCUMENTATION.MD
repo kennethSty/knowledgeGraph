@@ -68,7 +68,7 @@ After chunking the extracted documents, both the pages as well as the sections a
 It has to be mentioned, that for constructing a knowledge graph this step is fully optional. However, as Neo4j offers an easy construction of a Graph Vector store from a graph database, enabling the usage of Knowledge Graphs as a highly enriched vector store, embedding both the pages and the sections seemed to be a reasonable preprocessing step to include in order to make the graph "ready to use" for retrieval-augmented or similar text generation pipelines. 
 
 
-2. **Evaluation Data Preprocessing:**
+**Evaluation Data Preprocessing:**
 The German Medical Subject Headings dataset is downloadable in different file formats on the homepage of ZB MED. As the file contains both German and English terms in a nested restructure, preprocessing involves filtering out German terms by scanning through the tree and storing the terms in a set for keyword comparison in the later evaluation stage. Furthermore, we embedded each of the extracted terms with the procedure above using again `text-embedding-3-large` to enable a thoughtful evaluation based on semantic similarity. 
 
 #### Knowledge Graph Construction Pipeline
