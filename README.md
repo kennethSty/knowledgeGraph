@@ -81,7 +81,13 @@ This part might be slightly tricky, depending on which system the installation i
 If anything goes wrong in this step, please refer to the installation guide provided [here](https://python.langchain.com/docs/integrations/llms/llamacpp) and also [here](https://llama-cpp-python.readthedocs.io/en/latest/install/macos/)
 
 9. **Neo4j Setup:**
-Download Neo4j [here](https://neo4j.com/download/) and follow the installation guide [here](https://neo4j.com/docs/operations-manual/current/installation/osx/). My implementation was configured with OpenJDK 17. After completing the installation, open Neo4j on your local machine and set up the Apoc plugin. Also, open the directory in your NEO4J HOME where the neo4j.config is located and create an apoc.config file. In this file include `apoc.import.file.use_neo4j_config=false`. Note this allows Neo4j to read any file on your system, but for importing the Knowledge Graph from a JSON file on your machine this is necessary. For other ways of importing knowledge graph data please refer to the advanced Apoc documentation of Neo4j [here](https://neo4j.com/labs/apoc/4.2/overview/apoc.import/).
+- Download Neo4j [here](https://neo4j.com/download/) and follow the installation guide [here](https://neo4j.com/docs/operations-manual/current/installation/osx/). Node: My implementation was configured with OpenJDK 17.
+- Open Neo4j on your local machine and set up the Apoc plugin.
+- Open the directory in your NEO4J HOME where the neo4j.config is located and create an 'apoc.config file'. In this file include
+  ```bash
+   apoc.import.file.use_neo4j_config=false
+  ```
+Note: this configuration allows Neo4j to read any file on your system, but for importing the Knowledge Graph from a JSON file on your machine this is necessary. For other ways of importing knowledge graph data please refer to the advanced Apoc documentation of Neo4j [here](https://neo4j.com/labs/apoc/4.2/overview/apoc.import/).
 
 10. **Data & Model Setup:**
    - Download the [model file](https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct). Insert the model file at `models/Llama-3-SauerkrautLM-8b-Instruct-Q5_K_M.gguf`.
