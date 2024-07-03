@@ -13,6 +13,8 @@ This project utilizes a combination of Langchain, ChromaDB, Neo4j and llama.cpp 
 3. Knowledge Graph Construction
 4. Pipeline Evaluation
 
+The output of each node in the pipeline is stored in the data folders ranging from 00_raw, storing the extracted raw Wikipedia pages, over several stages of preprocessing to 04_eval, storing the evaluation results and 05_graphs which stores the constructed knowledge graphs exported out of Neo4J into a JSON file each. 
+
 ## Technologies Used
 
 - **Langchain:** Langchain is a framework for developing applications poI red by language models, including information retrievers, text generation pipelines and other wrappers to facilitate a seamless integration of LLM-related open-source software. Within the project, Langchain was implemented to build several LLM-chains both with OpenAI models as I ll as llama.cpp integrations. 
@@ -66,7 +68,7 @@ This project utilizes a combination of Langchain, ChromaDB, Neo4j and llama.cpp 
 7. **Llama.cpp GPU installation:**
    (When using CPU only, skip this step.)
 
-   This part might be slightly tricky, depending on which system the installation is done. I  do NOT recommend installation on Windows. I myself ran the code only on MacOS. Though, a     Linux installation is available as well.
+   This part might be slightly tricky, depending on which system the installation is done. I  do NOT recommend installation on Windows. I myself ran the code only on MacOS. However, a Linux installation is available as well.
 
    **Linux:**
    ```bash
@@ -130,6 +132,7 @@ prompt_strategies = ['german_prompt']
    python eval_pipeline.py
 ```
 
+- The evaluation results and the constructed graphs will be located in the `04_eval`and `05_graphs` directory. Graphs are stored as JSON files and can be imported into Neo4J again using the import function that we created as part of the KnowledgeGraph class. Usage is exemplified in the file `test_import.py` in the graph_generation package. Note that the import is only possible if the extended apoc configuration explained above is correctly implemented. 
 
 ### Advanced usage: 
 If you are interested in constructing larger knowledge graphs based on the extracted 10k Wikipedia pages follow this procedure
