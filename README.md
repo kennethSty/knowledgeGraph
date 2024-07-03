@@ -46,7 +46,7 @@ This project utilizes a combination of Langchain, ChromaDB, Neo4j and llama.cpp 
 
 4. **Clone the Repository into your working directory:**
    ```bash
-   git clone git@github.com:bgzdaniel/PubMedTempGraph.git
+   https://github.com/KennyLoRI/knowledgeGraph.git
    ```
    When using Mac set pgk_config path:
    ```bash
@@ -66,7 +66,7 @@ This project utilizes a combination of Langchain, ChromaDB, Neo4j and llama.cpp 
 7. **Llama.cpp GPU installation:**
    (When using CPU only, skip this step.)
 
-This part might be slightly tricky, depending on which system the installation is done. I  do NOT recommend installation on Windows. It has been tested, but requires multiple components which need to be downloaded. Please contact [Kenneth Styppa](mailto:kenneth.styppa@web.de) for details.
+This part might be slightly tricky, depending on which system the installation is done. I  do NOT recommend installation on Windows. I myself ran the code only on MacOS. Though, a Linux installation is available as well.
 
    **Linux:**
    ```bash
@@ -78,14 +78,18 @@ This part might be slightly tricky, depending on which system the installation i
    CMAKE_ARGS="-DLLAMA_METAL=on" FORCE_CMAKE=1 pip install --upgrade --force-reinstall llama-cpp-python --no-cache-dir
    ```
 
-If anything goes wrong in this step, please contact [Kenneth Styppa](mailto:kenneth.styppa@web.de) for **MacOS** installation issues. Also refer to the installation guide provided [here](https://python.langchain.com/docs/integrations/llms/llamacpp) and also [here](https://llama-cpp-python.readthedocs.io/en/latest/install/macos/)
+If anything goes wrong in this step, please refer to the installation guide provided [here](https://python.langchain.com/docs/integrations/llms/llamacpp) and also [here](https://llama-cpp-python.readthedocs.io/en/latest/install/macos/)
 
-8. **Data & Model Set-up:**
+9. **Neo4j Setup:**
+Download Neo4j [here](https://neo4j.com/download/) and follow the installation guide [here](https://neo4j.com/docs/operations-manual/current/installation/osx/). My implementation was configured with OpenJDK 17. After completing the installation, open Neo4j on your local machine and set up the Apoc plugin. Also, open the directory in your NEO4J HOME where the neo4j.config is located and create an apoc.config file. In this file include `apoc.import.file.use_neo4j_config=false`. Note this allows Neo4j to read any file on your system, but for importing the Knowledge Graph from a JSON file on your machine this is necessary. For other ways of importing knowledge graph data please refer to the advanced Apoc documentation of Neo4j [here](https://neo4j.com/labs/apoc/4.2/overview/apoc.import/).
+
+10. **Data & Model Setup:**
    - Download the [model file](https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct). Insert the model file at `models/Llama-3-SauerkrautLM-8b-Instruct-Q5_K_M.gguf`.
    - For a minimal test setup go to [this](https://drive.google.com/drive/folders/1-8hVX75ui3wtk-4OPQckqe8EdvQtv-1H?usp=sharing) Google Drive link and download the data folder (folder called `data`). Insert the data folder store in the `data` directory.
    - Set up an OpenAI Account [here](https://openai.com/index/openai-api/).
-   - Download Neo4j [here](https://neo4j.com/download/) and follow the installation guide [here](https://neo4j.com/docs/operations-manual/current/installation/osx/). My implementation was configured with OpenJDK 17. After completing the installation, open Neo4j on your local machine and set up the Apoc plugin. Also, open the directory in your NEO4J HOME where the neo4j.config is located and create an apoc.config file. In this file include `apoc.import.file.use_neo4j_config=false`. Note this allows Neo4j to read any file on your system, but for importing the Knowledge Graph from a JSON file on your machine this is the preferred way. For other ways of importing knowledge graph data please refer to the advanced Apoc documentation of Neo4j [here](https://neo4j.com/labs/apoc/4.2/overview/apoc.import/).
-   - Place your API keys and your Neo4j database credentials in `config/keys.env` in the following format: 
+
+11. **API Setup:**
+Place your API keys and your Neo4j database credentials in `config/keys.env` in the following format: 
   ```bash
   NEO4J_URL=bolt://localhost:7687
   NEO4J_USERNAME=
@@ -93,7 +97,7 @@ If anything goes wrong in this step, please contact [Kenneth Styppa](mailto:kenn
   OPENAI_API_KEY=
    ```
 
-## Pipeline overview and scripts usage:
+## Pipeline overview and scripts:
 The Pipeline is segmented into several interdependent scripts. Each high-level functionality is grouped in a Python package. Helper functions are stored separately within the utils folder. Each set of helper functions is again grouped by its application such as evaluation `eval_utils.py`, embedding `èmbed_utils.py`, knowledge graph construction `kg_utils.py` and preprocessing `preprocess_utils.py`.
 
 - **`config`:** Contains API keys as I ll as pipeline settings in the parameters.yml files. Whenever in the source code `config['value']` is used, this refers to the settings in the parameters.yml file. This allows to centrally modify the setting for a pipeline execution. The only exception is when executing the knowledge graph construction in the evaluation script. Here the configurations depend on the settings manually assigned in `models`, `prompt_strategies` and `node_filter_strategies` of the eval_pipeline.py file. 
@@ -102,6 +106,9 @@ The Pipeline is segmented into several interdependent scripts. Each high-level f
 - **`graph_generation`:** Contains all scripts around constructing and storing the knowledge graph. `kg_construction.py` contains the function to create the knowledge graph. In order for this function to successfully create the knowledge graph the local Neo4j server has to be running the corresponding DBMS specified in the keys.env file. To achieve this open the Neo4j Desktop application and start the DMBS. The `testexport.py` file demonstrates how an existing knowledge graph can be exported from Neo4j as I ll as imported. The underlying code to facilitate a seamless export and import is part of the overloaded KnowledgeGraph written for this purpose. The Python package also contains a second folder with legacy code that was developed along the way of several experiments. Besides facilitating transparency it also includes pointers towards implementing the pipeline in a parallelized share-memory setting and on a cluster. 
 - **`èvaluation`:** The evaluation package contains three scripts. The central script is `eval_pipeline.py` which runs a grid search over specified hyperparameter combinations. It executes the kg_construciton script as I ll as the script in `mesh_evaluation.py`. `mesh_evaluation.py` loads the nodes and relationship of the knowledge graph constructed in kg_construction and evaluates them with respect to the German MesH terms. The last script `èval_data_creation.py` is only included for transparency and showcases the random selection of the evaluation pages based on the retrieved data set of 10k Wikipedia documents. 
 - **`ùtils`:** Stores helper functions separately. Each set of helper functions is again grouped by its application such as evaluation `eval_utils.py`, embedding `èmbed_utils.py`, knowledge graph construction `kg_utils.py` and preprocessing `preprocess_utils.py`.
+
+## Usage
+1. Minimal Set-up: Given you installed all 
 
 ## Reproduction & Cost Estimation
 To use the methodologies implemented in the pipeline the user may rerun the scripts in the order discussed above. For running kg_construction without evaluation, the user may write a script only running the kg_construction functions. For reproducing the kg_construction and evaluation results documented in the practical report, the user may execute the eval_pipeline.py script. 
