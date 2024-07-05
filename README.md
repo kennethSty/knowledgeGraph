@@ -84,7 +84,7 @@ The output of each node in the pipeline is stored in the data folders ranging fr
 
 9. **Neo4j Setup:**
    - Download Neo4j [here](https://neo4j.com/download/) and follow the installation guide [here](https://neo4j.com/docs/operations-manual/current/installation/osx/). Node: My implementation was configured with OpenJDK 17.
-   - Open Neo4j on your local machine and set up the Apoc plugin.
+   - Open Neo4j on your local machine and set up the Apoc and GDS plugin by clicking through the UI `dbms>plugin>apoc>install` and `dbms>plugin>gds>install`.
    - Open the directory in your NEO4J HOME where the neo4j.config is located and create an 'apoc.config file'. In this file include
      ```bash
       apoc.import.file.use_neo4j_config=false
