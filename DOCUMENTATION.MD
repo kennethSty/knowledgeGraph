@@ -154,7 +154,7 @@ As the evaluation dataset consisted of 5 randomly selected pages, their interrel
 
 #### General Graph Metrics
 ### Evaluation Results
-| Metric                                        | Pipe A (med/filter_on) | Pipe B (ger/filter_off) | Pipe C (ger/filter_on) |
+| Metric                                        | Graph A (med/filter_on) | Graph B (ger/filter_off) | Graph C (ger/filter_on) |
 |-----------------------------------------------|-----------------------|------------------------|-----------------------|
 | Avg shortest path (all nodes)                 | 3.39                  | 3.65                   | 3.44                  |
 | Avg. shortest path (auto-generated nodes)           | 3.74                  | 5.93                   | 3.23                  |
