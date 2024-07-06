@@ -10,7 +10,7 @@ config = config.load_config()
 eval_settings = []
 models = ['gpt-3.5-turbo']
 prompt_strategies = ['german_prompt']
-node_filter_strategies = [False]
+node_filter_strategies = [True]
 
 for model in models:
     for prompt in prompt_strategies:
