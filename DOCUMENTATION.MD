@@ -134,11 +134,14 @@ On the one hand, bigrams such as "bacillus anthracis," "penicillin G," "doxycycl
 
 ### Hypothesis
 Trivially, 
+
 *H1:* Executing both pipelines runs stably without any issues. 
 
 During the developing of the pipelines, it was observed that the amount of automatically detected nodes substantially varies with the kind of prompt used as an input together with the paragraph whose information is to be extracted and structured into a graph format. Langchain's default as provided by Neo4j contains a lengthy text, framing the model to use general node types but poses otherwise no restrictions. The GraphTransformer implementation in Langchain contains the possibility to restrict Entity extraction via prompting to certain Node types. Examples of Node types would be "Person", "Car" or similar abstract objects. Since the medical field is highly diverse and specificity might be important, creating a list of available Node types proved a misleading strategy for restricting the extraction of medically relevant nodes. Two other approaches were available. First, stating the obvious, while not restricting extraction to certain entity types, one could set the stage and frame the model to extract only medically relevant information in an alternative prompt. As a consequence of this framing, we expect that the model including the medical graph construction prompts to return fewer nodes and relationships between those nodes. 
 As we refrained from overly specifying the already challenging prompt that described the task of extracting information about entities and their relationships in a structured format, we created a shortened alternative prompt based on the standard prompt from Neo4j mentioning specifically medical examples. To increase the density of medically relevant information in the returned graph without over-specifying the prompt we implemented a "gate-keeping" chain based on Llama3 Sauerkraut as already explained in the previous sections. Combining both measures in Pipeline A, while both are lacking in Pipeline B we make the following 2 hypotheses: 
+
 *H2:* The graph returned by pipeline A (graph A) is going to contain substantially fewer nodes and edges than the graph returned by pipeline B (graph B).
+
 *H3:* The density of medically relevant information in graph A will be substantially larger than the density in graph B. 
 
 As the evaluation dataset consisted of 5 randomly selected pages, their interrelationships are minimal.   
