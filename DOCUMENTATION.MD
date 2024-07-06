@@ -120,6 +120,15 @@ The following pipeline configurations were evaluated.
 | Node_Filter  | Llama3 Sauerkraut    | No filter |
 | Model  | GPT-3.5-Turbo    | GPT-3.5-Turbo  | 
 
+## Evaluation Dataset
+The five randomly selected Wikipedia pages that make up the evaluation set covered the following topics: 
+- "Milzbrand" (engl: Anthrax)
+- "Lindan" (engl: Lindane)
+- "Lissenzephalie" (engl: Lissencephaly)
+- "Ryanodin-Rezeptoren" (engl: Ryanodine receptors)
+- "Dermatitis" (engl: Dermatitis)
+The pages were relatively long, containing 32 sections in total, with the average section consisting of 357.75 tokens.  Specifically, it has to be remarked that all pages contain highly specialized medical information not only indicated by their titles but also by the 10 most frequent n-grams within the text (To the non-German reader: please excuse the missing English translation within the plot). Furthermore, it can be observed that the diversity in the formulations within the medical text is quite high. Since the most frequent 2-gram (Bacillus Antracis) only appears 6 times. 
+
 ### Hypothesis
 Trivially, 
 *H1:* Executing both pipelines runs stably without any issues. 
