@@ -163,10 +163,10 @@ As the evaluation dataset consisted of 5 randomly selected pages, their interrel
 | Total number of nodes                         | 332                   | 625                    | 319                   |
 | Total number of edges                         | 526                   | 1170                   | 498                   |
 | Number of edges between auto-generated nodes | 139                   | 472                    | 133                   |
-| MesH Precision Model (%)                      | **70.65**                 | 51.4                   | 69.5                  |
+| MesH Precision Model (%)                      | <u>**70.65**<u>                 | 51.4                   | 69.5                  |
 | MesH Precision Direct Matches (%)                 | 26.25                 | 27.5                   | 24.79                 |
-| Number of nodes matched in MesH by model      | 183                   | **284**                    | 171                   |
-| Number of nodes directly matched in MesH by keyword | 68                    | **152**                    | 61                    |
+| Number of nodes matched in MesH by model      | 183                   | <u>**284** <u>                   | 171                   |
+| Number of nodes directly matched in MesH by keyword | 68                    | <u>**152**<u>                    | 61                    |
 
 #### Quantitative Evaluation Results
 #### Qualitative Evaluation Results
