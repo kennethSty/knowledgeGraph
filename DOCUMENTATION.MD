@@ -158,13 +158,13 @@ As the evaluation dataset consisted of 5 randomly selected pages, their interrel
 |-----------------------------------------------|-----------------------|------------------------|-----------------------|
 | Avg shortest path (all nodes)                 | 3.39                  | 3.65                   | 3.44                  |
 | Avg. shortest path (auto-generated nodes)           | 3.74                  | 5.93                   | 3.23                  |
-| Avg. shortest path (sections)                 | 2.78                  | 5.02                   | 1.73                  |
+| Avg. shortest path (section nodes)                 | 2.78                  | 5.02                   | 1.73                  |
 | Max shortest path (all nodes)                 | 11.0                  | 12.0                   | 11.0                  |
 | Total number of nodes                         | 332                   | 625                    | 319                   |
 | Total number of edges                         | 526                   | 1170                   | 498                   |
-| Number of edges between only auto-generated nodes | 139                   | 472                    | 133                   |
+| Number of edges between auto-generated nodes | 139                   | 472                    | 133                   |
 | MesH Precision Model (%)                      | **70.65**                 | 51.4                   | 69.5                  |
-| Direct MesH Match Precision                   | 26.25                 | 27.5                   | 24.79                 |
+| MesH Precision Direct Matches (%)                 | 26.25                 | 27.5                   | 24.79                 |
 | Number of nodes matched in MesH by model      | 183                   | **284**                    | 171                   |
 | Number of nodes directly matched in MesH by keyword | 68                    | **152**                    | 61                    |
 
