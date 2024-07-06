@@ -5,8 +5,18 @@ The rapid expansion of published medical research presents a significant challen
 In light of this background, the aim of this project was to examine the possibility of automatically constructing a medical knowledge graph from unstructured German text. For this purpose, a pipeline was constructed applying a combination of GPT-3.5-Turbo and Llama3 Sauerkraut models [^9]. Furthermore, in hindsight of possible application scenarios in retrieval-augmented generation, this project uncovers the possibility of creating a graph-structured vector store, combining the relational information from a knowledge graph with the embedding space and fast information retrieval capabilities of a vector database.
 
 The remainder of this report is structured as follows. We begin with providing a brief overview of previously published work related to the project and highlight our main contributions. Next, we provide a detailed explanation of our methodologies, starting with a general overview and then delving into the logic behind each significant component of the developed pipelines step-by-step. This technical section is followed by a description of the datasets used for information retrieval and evaluation. The fourth section discusses our approach to evaluating and identifying the best possible system with the developed components and analyzes its performance on the described datasets. In the final section, we address the limitations of our proposed system and explore possibilities for future work in both research and open-source software contribution.
+ 
+
 
 ## Related Work 
+
+## Objectives
+The objectives of this project were twofold. Foremost, the objective was one of exploration. We aimed to explore and report on:
+  a) the feasibility of implementing a pipeline via langchain for constructing a specialized medical knowledge graph from unstructured German documents
+  b) a possible evaluation strategy for specialized knowledge graphs in the medical domain 
+  c) provided that a) was successful, different approaches for extending and improving the pipeline
+
+As will be discussed in the evaluation of our pipeline our main contributions to previous work consist in succeeding in (a) and (b). The small scale of our evaluation, however, does not suffice for clear statements regarding (c). Nevertheless, our results indicate certain trends and give rise to new hypotheses for future work as will be discussed in the last section of this report.
 
 ## Methods
 In this section, we explain the high-level methodologies employed in this project. Technical details about implementation specifics follow in the subsequent section. 
@@ -94,21 +104,27 @@ Besides outputting the final amount of matches as determined with the above pipe
 The following illustration outlines the previously described construction and evaluation steps graphically. 
 ![Graph Construction](kg_construction.png)
 
-## Implementation Details  
-### Knowledge Graph Construction Pipeline
-#### Data Extraction 
-#### Text Preprocessing and Chunking
-#### Document Embedding 
-#### Knowledge Graph Construction
-##### Filtering
-##### Prompting
-#### Knowledge Graph Storage
-#### Knowledge Graph Import and Export
-
 ## Evaluation
+The following section describes the approach to evaluating and comparing different pipeline configurations. 
 ### Evaluation Set-up
-#### Evaluation Data Preparation
-#### Graph Evaluation Procedure
+We evaluated two different pipeline configurations on 5 random pages out of the retrieved 10k Wikipedia pages. The small scale of these evaluations was due to the cost created by OpenAI API calls which would have otherwise exceeded the resources typically available a Software Practical. Regardless of this limitation, we reflect on the different generated graphs from different quantitative and qualitative angles, in order to improve our local and global understanding of the inner workings and challenges during the graph-construction-pipelines. These multiple viewpoints per graph consist of: 
+- General graph metrics including the number of nodes, edges and metrics of centrality
+- The density of medically relevant information within the graph, measured by the percentage of nodes matched within the German MeSH database
+- Different stages of connectivity, evaluated qualitatively by assessing shortest paths
+
+The following Pipeline configurations were evaluated. 
+
+| Configuration | Pipeline A | Pipeline B                          | 
+|------------|---------|----------------------------------------|
+| Prompt  | Prompt tailored for medical text    | Standard prompt provided by Neo4j and translated to German                           |
+| Node_Filter  | Llama3 Sauerkraut    | No filter |
+| Model  | GPT-3.5-Turbo    | GPT-3.5-Turbo  | 
+
+
+
+
+
+#### General Graph Metrics
 ### Evaluation Results
 #### Quantitative Evaluation Results
 #### Qualitative Evaluation Results
