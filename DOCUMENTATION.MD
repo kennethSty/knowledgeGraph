@@ -127,6 +127,7 @@ The five randomly selected Wikipedia pages that make up the evaluation set cover
 - "Lissenzephalie" (engl: Lissencephaly)
 - "Ryanodin-Rezeptoren" (engl: Ryanodine receptors)
 - "Dermatitis" (engl: Dermatitis)
+
 The pages were relatively long, containing 32 sections in total, with the average section consisting of 357.75 tokens.  Specifically, it has to be remarked that all pages contain highly specialized medical information not only indicated by their titles but also by the 10 most frequent n-grams within the text (To the non-German reader: please excuse the missing English translation within the plot). 
 ![2grams](eval_data_ngrams.png)
 On the one hand, bigrams such as "bacillus anthracis," "penicillin G," "doxycycline penicillin," and "ciprofloxacin doxycycline", indicate information out of clinical microbiology, pharmacology, and antibiotic treatments. On the other hand, the inclusion of "Milzbrand" represents information about infectious diseases, while the bigrams "lissencephaly mutations" indicate that the lissencephaly page includes information related to genealogy. Additionally, it can be observed that the diversity in the formulations within the medical text is quite high. Since the most frequent 2-gram (bacillus anthracis) only appears six times. Consequently, we assume that the texts used for evaluation are able to serve as a sufficient representation for general medical literature. 
