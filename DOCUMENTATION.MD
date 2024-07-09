@@ -88,9 +88,9 @@ Constructing and evaluating the knowledge graphs happens in two stages. In the f
 In the first step, we use Cypher queries to create a node for each page and a node for each section. Each section node thereby contains its section_id, its full content as well as its embedding. Each page node on the other hand contains its page_id, its title, its summary and its embedding. 
 Furthermore, we create a connection from each page to each section indicating their relationship. Also, we create a relationship between all succeeding sections as well as a pointer from each page to its first section. Lastly, we create a node for each category that appeared in the extracted documents and connect it to the pages where it was mentioned. The resulting graph forms the skeleton of the knowledge graph construction. 
 
-Afterwards, we iterate over each of the preprocessed sections and provide it as textual context together with an instructional prompt to a GraphTransformer instance, which is a Langchain wrapper implemented by Neo4j around a BaseModel class with an implementation of the 'with_structure_output()' function. As the model needs to take raw text as input and return highly structured, parseable text as output the group of models that can perform the automatic extraction of nodes and relationships is highly limited. While assessing several quantized open-source possibilities, we eventually settled on using OpenAI models as being the only reasonable option given the timeframe for this project. We anticipate, however, that other opportunities for opensource-based implementation strategies exist and will discuss possible approaches at the end of this report. 
+Afterwards, we iterate over each of the preprocessed sections and provide it as textual context together with an instructional prompt to a GraphTransformer instance, which is a Langchain wrapper implemented by Neo4j around a BaseModel class with an implementation of the 'with_structure_output()' function. As the model needs to take raw text as input and return highly structured, parseable text as output the group of models that can perform the automatic extraction of nodes and relationships is highly limited. While assessing several quantized open-source possibilities, we eventually settled on using OpenAI models as being the only reasonable option given the timeframe for this project. We anticipate, however, that other opportunities for open-source-based implementation strategies exist and will discuss possible approaches at the end of this report. 
 
-One iteration in the basic knowledge graph construction implementation in this project consists of passing a section to the GraphTransformer instance which returns a list of Nodes and Relationships which can then be upserted into Neo4j. We extend this basic pipeline with two optional features. The first feature consists of contextualizing the input prompt used in the base implementation to the medical domain. The other feature is more advanced. It employs a 5-bit quantized version of Llama3 Sauerkraut running on llama.cpp to filter out irrelevant nodes. I.e. we scan over all automatically extracted nodes of the GraphTransformer and show it to the Llama3 model, which then decides whether the extracted node has relevance for a medical knowledge graph or not. All nodes deemed irrelevant by the model are filtered out. The rest will be uploaded to the graph and connected to the node of the section out of which they were extracted. In this manner, we aimed to balance the trade-off between relevance and exhaustiveness of the information extracted and uploaded into the graph. 
+One iteration in the basic knowledge graph construction implementation in this project consists of passing a section to the GraphTransformer instance which returns a list of nodes and relationships which can then be upserted into Neo4j. We extend this basic pipeline with two optional features. The first feature consists of contextualizing the input prompt used in the base implementation to the medical domain. The other feature is more advanced. It employs a 5-bit quantized version of Llama3 Sauerkraut running on llama.cpp to filter out irrelevant nodes. I.e. we scan over all automatically extracted nodes of the GraphTransformer and show it to the Llama3 model, which then decides whether the extracted node has relevance for a medical knowledge graph or not. All nodes deemed irrelevant by the model are filtered out. The rest will be uploaded to the graph and connected to the node of the section out of which they were extracted. In this manner, we aimed to balance the trade-off between relevance and exhaustiveness of the information extracted and uploaded into the graph. 
 
 **Graph Evaluation:**
 After the graph construction is completed, the evaluation procedure is initiated. Initially, we conduct a Cypher query to extract all automatically created nodes in a list. Afterwards, we scan over each of these nodes. In one pass we perform the following steps. 
@@ -107,18 +107,18 @@ The following illustration outlines the previously described construction and ev
 ## Evaluation
 The following section describes the approach to evaluating and comparing different pipeline configurations. 
 ### Evaluation Set-up
-We evaluated two different pipeline configurations on 5 random pages out of the retrieved 10k Wikipedia pages. The small scale of these evaluations was due to the cost created by OpenAI API calls which would have otherwise exceeded the resources typically available a Software Practical. Regardless of this limitation, we reflect on the different generated graphs from different quantitative and qualitative angles, in order to improve our local and global understanding of the inner workings and challenges during the graph-construction-pipelines. These multiple viewpoints per graph consist of: 
+We evaluated three different pipeline configurations on 5 random pages out of the retrieved 10k Wikipedia pages. The small scale of these evaluations was partly due to the cost accompanied by OpenAI API calls as well as increased clarity for qualitative analysis. In the following section we reflect on the different generated graphs from different quantitative and qualitative angles, in order to improve our local and global understanding of the inner workings and challenges during the graph-construction-pipelines. These multiple viewpoints per graph consist of: 
 - General graph metrics including the number of nodes, edges and metrics of centrality
 - The density of medically relevant information within the graph, measured by the percentage of nodes matched within the German MeSH database
 - Different stages of connectivity, evaluated qualitatively by assessing shortest paths
 
 The following pipeline configurations were evaluated. 
 
-| Configuration | Pipeline A | Pipeline B                          | 
-|------------|---------|----------------------------------------|
-| Prompt  | Prompt tailored for medical text    | Standard prompt provided by Neo4j and translated to German                           |
-| Node_Filter  | Llama3 Sauerkraut    | No filter |
-| Model  | GPT-3.5-Turbo    | GPT-3.5-Turbo  | 
+| Configuration | Pipeline A | Pipeline B | Pipeline C | 
+|------------|---------|-------------------|------------------|
+| Prompt  | Prompt tailored for medical text    | Standard prompt provided by Neo4j and translated to German  | Standard prompt provided by Neo4j and translated to German  |
+| Node_Filter  | Llama3 Sauerkraut Filter    | No filter | Llama3 Sauerkraut Filter 
+| Model  | GPT-3.5-Turbo    | GPT-3.5-Turbo  | GPT-3.5-Turbo  | 
 
 ## Evaluation Dataset
 The five randomly selected Wikipedia pages that make up the evaluation set covered the following topics: 
@@ -128,27 +128,33 @@ The five randomly selected Wikipedia pages that make up the evaluation set cover
 - "Ryanodin-Rezeptoren" (engl: Ryanodine receptors)
 - "Dermatitis" (engl: Dermatitis)
 
-The pages were relatively long, containing 32 sections in total, with the average section consisting of 357.75 tokens.  Specifically, it has to be remarked that all pages contain highly specialized medical information not only indicated by their titles but also by the 10 most frequent n-grams within the text (To the non-German reader: please excuse the missing English translation within the plot). 
+The pages were relatively long, containing 32 sections in total, with the average section consisting of 357.75 tokens.  Specifically, it has to be remarked that all pages contain highly specialized medical information not only indicated by their titles but also by the 10 most frequent n-grams within the text (to the non-German reader: please excuse the missing English translation within the plot). 
 ![2grams](eval_data_ngrams.png)
 On the one hand, bigrams such as "bacillus anthracis," "penicillin G," "doxycycline penicillin," and "ciprofloxacin doxycycline", indicate information out of clinical microbiology, pharmacology, and antibiotic treatments. On the other hand, the inclusion of "Milzbrand" represents information about infectious diseases, while the bigrams "lissencephaly mutations" indicate that the lissencephaly page includes information related to genealogy. Additionally, it can be observed that the diversity in the formulations within the medical text is quite high. Since the most frequent 2-gram (bacillus anthracis) only appears six times. Consequently, we assume that the texts used for evaluation are able to serve as a sufficient representation for general medical literature. 
 
 ### Hypothesis
-Trivially, 
+Previously to the evaluation of the graphs generated by the different pipeline configurations, we highlight the following hypothesis.
 
-*H1:* Executing both pipelines runs stably without any issues. 
+Trivially, we expect:
+*H1:* Executing all three pipelines runs stably without any issues. 
 
-During the development of the pipelines, it was observed that the amount of automatically detected nodes substantially varies with the kind of prompt used as an input together with the paragraph whose information is to be extracted and structured into a graph format. Langchain's default as provided by Neo4j contains a lengthy text, framing the model to use general node types but poses otherwise no restrictions. The GraphTransformer implementation in Langchain contains the possibility to restrict Entity extraction via prompting to certain Node types. Examples of Node types would be "Person", "Car" or similar abstract objects. Since the medical field is highly diverse and specificity might be important, creating a list of available Node types proved a misleading strategy for restricting the extraction of medically relevant nodes. Two other approaches were available. First, stating the obvious, while not restricting extraction to certain entity types, one could set the stage and frame the model to extract only medically relevant information in an alternative prompt. As a consequence of this framing, we expect that the model including the medical graph construction prompts to return fewer nodes and relationships between those nodes. 
-As we refrained from overly specifying the already challenging prompt that described the task of extracting information about entities and their relationships in a structured format, we created a shortened alternative prompt based on the standard prompt from Neo4j mentioning specifically medical examples. To increase the density of medically relevant information in the returned graph without over-specifying the prompt we implemented a "gate-keeping" chain based on Llama3 Sauerkraut as already explained in the previous sections. Combining both measures in Pipeline A, while both are lacking in Pipeline B we make the following 2 hypotheses: 
-
+Secondly, we expect:
 *H2:* The graph returned by pipeline A (graph A) is going to contain substantially fewer nodes and edges than the graph returned by pipeline B (graph B).
+*H3:* The graph returned by pipeline C (graph C) is going to contain fewer nodes and edges than graph B and graph A. 
 
-*H3:* The density of medically relevant information in graph A will be substantially larger than the density in graph B. 
+Thereby, we base H2 and H3 on the following reasoning. During the development of the pipelines, it was observed that the amount of automatically detected nodes substantially varies with the kind of prompt used as an input together with the paragraph whose information is to be extracted and structured into a graph format. Langchain's default as provided by Neo4j contains a lengthy text, framing the model to use general node types but poses otherwise no restrictions. The GraphTransformer implementation in Langchain contains the possibility to restrict entity extraction via prompting to certain node types. Examples of node types would be "Person", "Car" or similar abstract objects. Since the medical field is highly diverse and specificity might be important, creating a list of available node types proved a misleading strategy for restricting the extraction of medically relevant nodes. Two other approaches were available. First, stating the obvious, while not restricting extraction to certain entity types, one could set the stage and frame the model to extract only medically relevant information in an alternative prompt. 
+In other words, the prompt tries to make the model more selective in the entities and relationships it extracts. As a consequence, we expect that the pipeline configuration including the medical graph construction prompts to return fewer automatically detected nodes and relationships. 
+Likewise, we expect the activation of our Llama3 filter as a second gate-keeping chain to strongly reduce the number of nodes and edges returned by the pipeline. This is expected, as we assume the model to further filter out entities which are deemed to be not relevant to a medical context. 
+Consequently, we expect pipeline A, which includes both the more restrictive prompt as well as the additional node filter to return fewer nodes and edges than pipeline B. Pipeline C, on the other hand only contains the node filter without the restrictive medical prompt. Consequently, we again expect it to return less nodes and edges than pipeline B. However, we expect pipeline A to return more nodes and edges than pipeline C, as its prompt is more closely aligned with the criteria that the filter uses to filter out the nodes. Thus we assume that after filtering in pipeline A, more nodes will be left than after filtering in pipeline C. 
 
-As the evaluation dataset consisted of 5 randomly selected pages, their interrelationships are minimal.   
+Contrary to the number of nodes and edges in the graphs, we anticipate the following relationships in the density of extracted medically relevant information: 
+*H4:* The MeSH precision in graph A and C will be substantially larger than the precision in graph B. 
+*H5:* The MeSH precision in graph A will be substantially larger than the precision in graph C. 
+*H6:* The absolute number of MeSH-matched nodes will be substantially larger in graph A than in graph B.
+*H7:* The absolute number of MeSH-matched nodes will be the same in graph C and in graph B.
 
-
-
-
+We base H4 on the assumption that the pipline with the node filter together with (or without) the medical prompt is engineered the most towards returning medical entities. Consequently, we expect a larger percentage in MeSH matches in pipeline A and C. 
+Furthermore, we assume that pipeline C without the medical input prompt is going to face a situation where many extracted entities are not medically relevant and therefore filtered out. As we assume that a more general input prompt is less successful in extracting a high number of medically relevant intities, we thus hypothesize the absolut number of entities matched with MeSH terms in pipeline C to be smaller than the absolute number of the entities extracted in pipeline A. Additionally, as we assume our node filter to only filter out medically not relevant information and as pipeline B and pipeline C use the same input prompt, we expect the absolute number of MeSH-matched nodes to be equal in graph B in C. 
 
 
 
