@@ -167,9 +167,16 @@ Lastly, regarding the detected relationships in the graphs, we expect:
 When it comes to the connectivity of the graph, from a scalability perspective the graph should be as sparse as possible [^15], while nevertheless containing the links relevant to its specific domain. Thus, we make the claim that a good pipeline for the medical application scenario should only include connections between documents and concepts via medically relevant nodes. 
 This would ensure that if a connection within the graph exists, it is also relevant from a medical point of view. As in pipeline B, no restrictions are made at all, we expect the resulting graph to not only contain more connections but also that some of those will be irrelevant. As betweenness centrality measures the importance of a node as a connector between other nodes, we expect a good graph customized to the medical context to only contain medically relevant concepts amongst the nodes with the highest score in betweenness centrality [^14]. As pipelines A and C to contain components that customize them to the medical setting, we make H8. As we expect graph B to be somewhat noisier and larger with respect to the nodes and edges it includes, we also expect some of its nodes with a high betweenness centrality score to be unrelated to the medical field. 
 
+Furthermore, we hypothesize the following relations between the 5 evaluation pages: 
+- *H10:* In graphs A, B and C there exists a path between the page node of Lissencephaly and the page node of Ryanodine receptors. 
+- *H11:* In graphs A, B and C there exists a path between the page node of Anthrax and the page node of Dermatitis. 
+The first hypothesis, H10, is based on the observation that both Lissencephaly and Ryanodine receptors are concepts related to the human brain. While the extracted page on Lissencephaly explains it as a brain disease, the extracted Wikipedia page on Ryanodine receptors mentions certain activities in the brains of adults that could be related to learning. The second hypothesis is similarly based on observations made in the text of the related pages as both describe skin-related symptoms. Therefore we would expect a skin-related connection between both pages. From screening the wikipedia pages, no other reltionships were expected. 
 
 
 ### Evaluation Results
+The following figure illustrates the results of the graph construction and evaluation runs. 
+
+
 | Metric                                        | Graph A (med/filter_on) | Graph B (ger/filter_off) | Graph C (ger/filter_on) |
 |-----------------------------------------------|-----------------------|------------------------|-----------------------|
 | Avg shortest path (all nodes)                 | 3.39                  | 3.65                   | 3.44                  |
@@ -183,6 +190,17 @@ This would ensure that if a connection within the graph exists, it is also relev
 | MesH Precision Direct Matches (%)                 | 26.25                 | 27.5                   | 24.79                 |
 | Number of nodes matched in MesH by model      | 183                   | ***284***                   | 171                   |
 | Number of nodes directly matched in MesH by keyword | 68                    | ***152***                    | 61                    |
+| Construction time in seconds | 756.6 | 508 | 608|
+
+All pipeline runs ran through executions without issues, confirming H1. In terms of runtime, pipeline B finished the graph construction in the shortest period of time with 508 seconds, thus taking approximately 100 seconds per page. This improved runtime is expected as no additional node filtering was conducted. Pipeline C scored second in terms of runtime, which was unexpected as we assumed that the German prompt returns a larger number of nodes which theoretically would have to increase the amount of checks made in the node filter stage. Possible explanations for this behaviour might be different pipeline execution times resulting from the increased specificity of the medical input prompt. 
+
+Additionally, the second most notable difference between the graphs is the difference in size. Graph B is larger than Graph A by almost a factor of 2, confirming H2. The same holds for the difference in nodes and edges between Graph B and C. The difference between A and C is more subtle. Graph A contains 4 percentage points more nodes and 5 percentage points more edges. While this difference might not suffice for a "substantial" difference as hypothesized in H3 our previous reasoning could explain this tendency.
+
+
+
+as can be seen in the the   the number of nodes and edges is substantially larger in graph B than in graphs A and C. 
+
+
 
 #### Quantitative Evaluation Results
 #### Qualitative Evaluation Results
