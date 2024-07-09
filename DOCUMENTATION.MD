@@ -163,7 +163,9 @@ Furthermore, we assume that pipeline C without the medical input prompt is going
 Lastly, regarding the detected relationships in the graphs, we expect: 
 - *H8:* Among the 10 nodes with the highest betweenness centrality score in graphs A and C all are MeSH-matched.
 - *H9:* Among the 10 nodes with the highest betweenness centrality score in graph B not all are MeSH-matched.
-When it comes to the connectivity of the graph, a good pipeline for the medical application scenario should only include connections between documents and concepts via medically relevant nodes. This would ensure that if a connection within the graph exists, it is also relevant from a medical point of view. As in pipeline B no restrictions are made at all, we expect the resulting graph to not only contain more connections but also that some of those will be irrelevant. As betweenness centrality measures the importance of a node as a connector between other nodes, we expect a good graph customized to the medical context to only contain medically relevant concepts amongst the nodes with the highest score in betweenness centrality. As pipelines A and C to contain components that customize them to the medical setting, we make H8. As we expect graph B to be somewhat noisier and larger with respect to the nodes and edges it includes, we also expect some of its nodes with a high betweenness centrality score to be unrelated to the medical field. 
+
+When it comes to the connectivity of the graph, from a scalability perspective the graph should be as sparse as possible [^15], while nevertheless containing the links relevant to its specific domain. Thus, we make the claim that a good pipeline for the medical application scenario should only include connections between documents and concepts via medically relevant nodes. 
+This would ensure that if a connection within the graph exists, it is also relevant from a medical point of view. As in pipeline B, no restrictions are made at all, we expect the resulting graph to not only contain more connections but also that some of those will be irrelevant. As betweenness centrality measures the importance of a node as a connector between other nodes, we expect a good graph customized to the medical context to only contain medically relevant concepts amongst the nodes with the highest score in betweenness centrality [^14]. As pipelines A and C to contain components that customize them to the medical setting, we make H8. As we expect graph B to be somewhat noisier and larger with respect to the nodes and edges it includes, we also expect some of its nodes with a high betweenness centrality score to be unrelated to the medical field. 
 
 
 
@@ -230,3 +232,6 @@ Going beyond shortest paths and graph structure, the capacity of the pipeline to
 [^13]: Feng, Yichun, et al. "Knowledge Graph-based Thought: a knowledge graph enhanced LLMs framework for pan-cancer question answering." bioRxiv (2024): 2024-04.
 
 [^14]: Brandes, Ulrik. "A faster algorithm for betweenness centrality." Journal of mathematical sociology 25.2 (2001): 163-177.
+
+[^15]: Geisberger, Robert, et al. "Contraction hierarchies: Faster and simpler hierarchical routing in road networks." Experimental Algorithms: 7th International Workshop, WEA 2008 Provincetown, MA, USA, May 30-June 1, 2008 Proceedings 7. Springer Berlin Heidelberg, 2008.
+
