@@ -192,15 +192,14 @@ The following figure illustrates the results of the graph construction and evalu
 | Number of nodes directly matched in MesH by keyword | 68                    | ***152***                    | 61                    |
 | Construction time in seconds | 756.6 | 508 | 608|
 
-All pipeline runs ran through executions without issues, confirming H1. In terms of runtime, pipeline B finished the graph construction in the shortest period of time with 508 seconds, thus taking approximately 100 seconds per page. This improved runtime is expected as no additional node filtering was conducted. Pipeline C scored second in terms of runtime, which was unexpected as we assumed that the German prompt returns a larger number of nodes which theoretically would have to increase the amount of checks made in the node filter stage. Possible explanations for this behaviour might be different pipeline execution times resulting from the increased specificity of the medical input prompt. 
+The pipelines were executed without issues, confirming H1. In terms of runtime, pipeline B finished the graph construction in the shortest period of time with 508 seconds, thus taking approximately 100 seconds per page. This improved runtime is expected as no additional node filtering was conducted. Pipeline C scored second in terms of runtime, which was unexpected as we assumed that the German prompt returns a larger number of nodes which theoretically would have to increase the amount of checks made in the node filter stage. Possible explanations for this behaviour might be different pipeline execution times resulting from the increased specificity of the medical input prompt. 
 
-Additionally, the second most notable difference between the graphs is the difference in size. Graph B is larger than Graph A by almost a factor of 2, confirming H2. The same holds for the difference in nodes and edges between Graph B and C. The difference between A and C is more subtle. Graph A contains 4 percentage points more nodes and 5 percentage points more edges. While this difference might not suffice for a "substantial" difference as hypothesized in H3 our previous reasoning could explain this tendency.
+Concerning the size of the constructed graphs notable differences can be observed. Graph B is larger than Graph A by almost a factor of 2, confirming H2. The same holds for the difference in nodes and edges between Graph B and C. The difference between A and C is more subtle. Graph A contains 4 percentage points more nodes and 5 percentage points more edges. While this difference might not suffice for a "substantial" difference as hypothesized in H3 our previous reasoning could explain this tendency.
+While in Graph B the number of nodes might be two times higher, the density of medically relevant nodes, measured by the percentage of entities matched in the MeSH dataset, is 19 percentage points smaller than the score yielded by pipeline A. A similarly large difference of 18 percentage points can be observed to graph C. Thus, the combination of medical prompt and node filter indeed seems to improve the relevance of the constructed graph with respect to its domain, confirming H4. 
 
+H5, however, is not confirmed, as the difference of one percentage point between graph A and graph C is very small. Thus it appears, that instead of the prompt as initially assumed especially the second chain for node filtering might be a more powerful tool for ensuring domain-specificity of automatically construction knowledge graphs. 
 
-
-as can be seen in the the   the number of nodes and edges is substantially larger in graph B than in graphs A and C. 
-
-
+The
 
 #### Quantitative Evaluation Results
 #### Qualitative Evaluation Results
