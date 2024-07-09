@@ -54,7 +54,19 @@ The full content of the extracted pages is substantially longer than the summari
 
 #### The German Bilingual MeSH
 The German Bilingual Medical Subject Headings database (short: MeSH) is a biomedical thesaurus storing English medical terms with their translated German version in a tree-like dependency structure. Originally developed by the U.S. National Library of Medicine, the German MeSH is hosted and maintained by the ZB MED- the German pendant to the U.S. National Library of Medicine - since 2020. The translations and all went through a very careful quality assurance funnel ranging from term identification, term extraction, automatic translation with DeepL to translation curation and translation improvement through subject matter experts [^11]. The German MeSH is downloadable in several formats. For this project, the JsonLD format was chosen.
-The corresponding file contained 96.745 unique terms consisting of 165.868 words. Some of these terms include undetected duplicates since certain terms are written using varying sentence structures such as "Husten, trockener" and "trockener Husten". However, during evaluation, this only increases the likelihood of matching correctly detected nodes in the graph construction procedure such that these semantic duplicates were not removed. 
+The corresponding file contained 96.745 unique terms consisting of 165.868 words. Some of these terms include undetected duplicates since certain terms are written using varying sentence structures such as "Husten, trockener" and "trockener Husten". However, during evaluation, this only increases the likelihood of matching correctly detected nodes in the graph construction procedure such that these semantic duplicates were not removed. We used the German Bilingual MeSH dataset as a ground truth for determining whether the automatically extracted nodes during graph construction are medically relevant. More details on this approach follow in the section on technical implementation.
+
+#### Evaluation Dataset
+The evaluation dataset consisted of five randomly selected Wikipedia pages that make up the evaluation set covered the following topics: 
+- "Milzbrand" (engl: Anthrax)
+- "Lindan" (engl: Lindane)
+- "Lissenzephalie" (engl: Lissencephaly)
+- "Ryanodin-Rezeptoren" (engl: Ryanodine receptors)
+- "Dermatitis" (engl: Dermatitis)
+
+The pages were relatively long, containing 32 sections in total, with the average section consisting of 357.75 tokens.  Specifically, it has to be remarked that all pages contain highly specialized medical information not only indicated by their titles but also by the 10 most frequent bigrams within the text (to the non-German reader: please excuse the missing English translation within the plot). 
+On the one hand, bigrams such as "bacillus anthracis," "penicillin G," "doxycycline penicillin," and "ciprofloxacin doxycycline", indicate information out of clinical microbiology, pharmacology, and antibiotic treatments. On the other hand, the inclusion of "Milzbrand" represents information about infectious diseases, while the bigrams "lissencephaly mutations" indicate that the lissencephaly page includes information related to genealogy. Additionally, it can be observed that the diversity in the formulations within the medical text is quite high. Since the most frequent 2-gram (bacillus anthracis) only appears six times. Consequently, we assume that the texts used for evaluation are able to serve as a sufficient representation for general medical literature. 
+![2grams](eval_data_ngrams.png)
 
 
 ### Technical Implementation
@@ -63,6 +75,7 @@ The following section lists details on implementing an automated system to gener
 The data extraction and preprocessing stage can again be split into two subtasks. One subtask involves several steps to extract and prepare the raw Wikipedia data for embedding and subsequent knowledge graph construction. The other subtask involves preparing the Medical Subject Headings file for later evaluation. 
 
 **Wikipedia Data Preprocessing:**
+
 In total, we extracted 10,000 German Wikipedia pages based on the keyword „Krankheit“ (=„Sickness“). The extraction uses the Wikipedia Extracts API, storing semi-parsed wikitext with headers and subheaders denoted by "==" and "===" respectively. To facilitate a seamless extraction procedure of the full 10.000 pages the Wikipedia Python package was overloaded to allow for a batch-wise iterative extraction procedure overwriting the „SROF“ identifier, which indicates the index of documents until which the last pages were retrieved. Extracting more than 10.000 pages related to the term „Krankheit“ was not possible even with this overloaded strategy, as the Wikipedia API imposes a hard limit on the amount of pages being retrievable for the same keyword. 
 As discussed earlier, the length of the pages as well as the complexity of the task give reason to limit the context size of each knowledge graph construction call as much as possible without cutting off important context in each chunk. For this purpose, we employed a conservative chunking strategy that consisted of splitting a page based on its section headers indicated with structural identifiers based on the Wikitext standard. The resulting chunked pages consisted of 34074 sections in total. During chunking the data 7463 paragraphs were empty and skipped. The average chunk/section of this procedure contains 201 tokens when tokenized with the spacy nlp tokenizer based on "de_core_news_sm". For reference, a full page on average has 848 tokens. Thus, the chunking strategy splits each page on average into four sections. To keep the information on the order of the sections in the original text, a unique section_id was generated indicating with an integer in front of the page id, if it was the first (0), or i-th section (i-1) as can be seen in the following example:
 
@@ -77,7 +90,8 @@ After chunking the extracted documents, both the pages as well as the sections a
 It has to be mentioned, that for constructing a knowledge graph this step is fully optional. However, as Neo4j offers an easy construction of a Graph Vector store from a graph database, enabling the usage of Knowledge Graphs as a highly enriched vector store, embedding both the pages and the sections seemed to be a reasonable preprocessing step to include in order to make the graph "ready to use" for retrieval-augmented or similar text generation pipelines. 
 
 
-**Evaluation Data Preprocessing:**
+**MeSH Data Preprocessing:**
+
 The German Medical Subject Headings dataset is downloadable in different file formats on the homepage of ZB MED. As the file contains both German and English terms in a nested restructure, preprocessing involves filtering out German terms by scanning through the tree and storing the terms in a set for keyword comparison in the later evaluation stage. Furthermore, we embedded each of the extracted terms with the procedure above using again `text-embedding-3-large` to enable a thoughtful evaluation based on semantic similarity. 
 
 The following illustration provides an overview of the previously mentioned preprocessing steps with respect to the files and structure of this repository. 
@@ -121,19 +135,7 @@ The following pipeline configurations were evaluated.
 | Node_Filter  | Llama3 Sauerkraut Filter    | No filter | Llama3 Sauerkraut Filter 
 | Model  | GPT-3.5-Turbo    | GPT-3.5-Turbo  | GPT-3.5-Turbo  | 
 
-## Evaluation Dataset
-The five randomly selected Wikipedia pages that make up the evaluation set covered the following topics: 
-- "Milzbrand" (engl: Anthrax)
-- "Lindan" (engl: Lindane)
-- "Lissenzephalie" (engl: Lissencephaly)
-- "Ryanodin-Rezeptoren" (engl: Ryanodine receptors)
-- "Dermatitis" (engl: Dermatitis)
-
-The pages were relatively long, containing 32 sections in total, with the average section consisting of 357.75 tokens.  Specifically, it has to be remarked that all pages contain highly specialized medical information not only indicated by their titles but also by the 10 most frequent bigrams within the text (to the non-German reader: please excuse the missing English translation within the plot). 
-![2grams](eval_data_ngrams.png)
-On the one hand, bigrams such as "bacillus anthracis," "penicillin G," "doxycycline penicillin," and "ciprofloxacin doxycycline", indicate information out of clinical microbiology, pharmacology, and antibiotic treatments. On the other hand, the inclusion of "Milzbrand" represents information about infectious diseases, while the bigrams "lissencephaly mutations" indicate that the lissencephaly page includes information related to genealogy. Additionally, it can be observed that the diversity in the formulations within the medical text is quite high. Since the most frequent 2-gram (bacillus anthracis) only appears six times. Consequently, we assume that the texts used for evaluation are able to serve as a sufficient representation for general medical literature. 
-
-### Hypothesis
+## Hypothesis
 Previously to the evaluation of the graphs generated by the different pipeline configurations, we highlight the following hypothesis together with their explanations.
 
 Trivially, we expect:
@@ -145,7 +147,7 @@ Secondly, we expect:
 
 Thereby, we base H2 and H3 on the following reasoning. During the development of the pipelines, it was observed that the amount of automatically detected nodes substantially varies with the kind of prompt used as an input together with the paragraph whose information is to be extracted and structured into a graph format. Langchain's default as provided by Neo4j contains a lengthy text, framing the model to use general node types but poses otherwise no restrictions. The GraphTransformer implementation in Langchain contains the possibility to restrict entity extraction via prompting to certain node types. Examples of node types would be "Person", "Car" or similar abstract objects. Since the medical field is highly diverse and specificity might be important, creating a list of available node types proved a misleading strategy for restricting the extraction of medically relevant nodes. Two other approaches were available. First, stating the obvious, while not restricting extraction to certain entity types, one could set the stage and frame the model to extract only medically relevant information in an alternative prompt. 
 
-In other words, the prompt tries to make the model more selective in the entities and relationships it extracts. As a consequence, we expect that the pipeline configuration including the medical graph construction prompts to return fewer automatically detected nodes and relationships. 
+In other words, the medical prompt tries to make the model more selective in the entities and relationships it extracts. As a consequence, we expect that the pipeline configuration including the medical prompt to return fewer automatically detected nodes and relationships. 
 Likewise, we expect the activation of our Llama3 filter as a second gate-keeping chain to strongly reduce the number of nodes and edges returned by the pipeline. This is expected, as we assume the model to further filter out entities which are deemed to be not relevant to a medical context. 
 
 Consequently, we expect pipeline A, which includes both the more restrictive prompt as well as the additional node filter to return fewer nodes and edges than pipeline B. Pipeline C, on the other hand only contains the node filter without the restrictive medical prompt. Consequently, we again expect it to return less nodes and edges than pipeline B. However, we expect pipeline A to return more nodes and edges than pipeline C, as its prompt is more closely aligned with the criteria that the filter uses to filter out the nodes. Thus we assume that after filtering in pipeline A, more nodes will be left than after filtering in pipeline C. 
@@ -154,11 +156,10 @@ Contrary to the number of nodes and edges in the graphs, we anticipate the follo
 - *H4:* The MeSH precision in graph A and C will be substantially larger than the precision in graph B. 
 - *H5:* The MeSH precision in graph A will be substantially larger than the precision in graph C. 
 - *H6:* The absolute number of MeSH-matched nodes will be substantially larger in graph A than in graph B.
-- *H7:* The absolute number of MeSH-matched nodes will be the same in graph C and in graph B.
+- *H7:* The absolute number of MeSH-matched nodes will be the same in graph C and graph B.
 
-We base H4 on the assumption that the pipline with the node filter together with (or without) the medical prompt is engineered the most towards returning medical entities. Consequently, we expect a larger percentage in MeSH matches in pipeline A and C. 
-Furthermore, we assume that pipeline C without the medical input prompt is going to face a situation where many extracted entities are not medically relevant and therefore filtered out. As we assume that a more general input prompt is less successful in extracting a high number of medically relevant intities, we thus hypothesize the absolut number of entities matched with MeSH terms in pipeline C to be smaller than the absolute number of the entities extracted in pipeline A. Additionally, as we assume our node filter to only filter out medically not relevant information and as pipeline B and pipeline C use the same input prompt, we expect the absolute number of MeSH-matched nodes to be equal in graph B in C. 
-
+We base H4 on the assumption that the pipeline with the node filter together with (or without) the medical prompt is engineered the most towards returning medical entities. Consequently, we expect a larger percentage in MeSH matches in graphs A and C. 
+Furthermore, we assume that pipeline C without the medical input prompt is going to face a situation where many extracted entities are not medically relevant and therefore filtered out. As we assume that a more general input prompt is less successful in extracting a high number of medically relevant entities, we thus hypothesize the absolute number of entities matched with MeSH terms in graph C to be smaller than the absolute number of entities in graph A. Additionally, as we assume our node filter to only filter out medically irrelevant information and as pipelines B and C use the same input prompt, we expect the absolute number of MeSH-matched nodes in graphs B in C to be equal. 
 
 
 #### General Graph Metrics
