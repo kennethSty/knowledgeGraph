@@ -201,6 +201,8 @@ H5, however, is not confirmed, as the difference of one percentage point between
 
 While it appears the second filter chain is of critical importance to ensure domain specificity, the results show it requires further tuning as in absolute numbers pipeline B (without the filter) identifies 101 more entities matched in the MeSH database. A similar drop can be observed from graph B to C. In other words, when using the filter, we increase precision, but we reduce recall as indicated by the 100+ nodes that pipelines A and C filtered out. Consequently, H6 and H7 have to be rejected. Possible explanations for this behaviour could be the simple input prompt used for the filter chain, which was necessary to ensure stable outputs of the quantized Llama3 Sauerkraut model. Thus, a possible improvement resides in switching choosing a different technological set-up to deploy Lllama3 Sauerkraut without quantization. 
 
+Considering, the connectivity of the graphs
+
 
 
 
