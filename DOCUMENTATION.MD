@@ -13,9 +13,9 @@ The remainder of this report is structured as follows. We begin with providing a
 
 ## Objectives
 The objectives of this project were twofold. Foremost, the objective was one of exploration. We aimed to explore and report on:
-  a) the feasibility of implementing a pipeline via langchain for constructing a specialized medical knowledge graph from unstructured German documents
-  b) a possible evaluation strategy for specialized knowledge graphs in the medical domain 
-  c) highlighting different approaches for extending and improving a graph construction pipeline
+  1. the feasibility of implementing a pipeline via langchain for constructing a specialized medical knowledge graph from unstructured German documents
+  2. a possible evaluation strategy for specialized knowledge graphs in the medical domain 
+  3. highlighting different approaches for extending and improving a graph construction pipeline
 
 As will be discussed in the evaluation of our pipeline our main contributions to previous work consist in succeeding in (a) and (b). The small scale of our evaluation, however, does not suffice for clear statements regarding (c). Nevertheless, our results indicate certain trends and give rise to new hypotheses for future work as will be discussed in the last section of this report.
 
