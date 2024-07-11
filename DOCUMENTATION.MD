@@ -175,6 +175,7 @@ The first hypothesis, H10, is based on the observation that both Lissencephaly a
 
 
 ### Evaluation Results
+#### Results
 The following figure illustrates the results of the graph construction and evaluation runs. 
 
 
@@ -208,11 +209,16 @@ Next, we assess H10 and H11 visually given the shortest paths that connect the d
 
 ![Shortest Page Paths](shortest_path_A&B.png)
 Indeed the detected links in Graph B demonstrate the expected relationship. Namely a connection between Lissencephaly and Ryanodine Receptors via the general node "brain" and a connection between Anthrax and Dermatitis, via the skin symptom node "blisters". Although including the prompt and node filter restriction to the medical case, pipeline A is not able to identify these relationships. Graph B, however, also contains several links one could classify as "medically irrelevant" or "spurious" such as, for instance, the connection between Anthrax and Lindan via the node "Schweiz" (engl.: Swiss). 
-Besides the already discussed links, both graphs also include a link we did not anticipate. A link between "Lindan" and "Anthrax" via the node "blood". While blood is indeed a medical node, we nevertheless consider the detected relationship to be only a weak one given the context in which the term blood appears. In the case of Anthrax, the corresponding page mentions black blood colour to indicate an anthrax-diseased milt. In the case of Lindan, the page mentions that a certain blood level poses a severe danger to humans due the possibility to affect inner organs as well as blood formation. In other words, we classify the relationship as weak because a certain characteristic of blood can be used for characterizing both concepts while no imminently important relationship between both pages exists.
+Besides the already discussed links, both graphs also include a link we did not anticipate. A link between "Lindan" and "Anthrax" via the node "blood". While blood is indeed a medical node, we nevertheless consider the detected relationship to be only a weak one given the context in which the term blood appears. In the case of Anthrax, the corresponding page mentions black blood colour to indicate an anthrax-diseased milt. In the case of Lindan, the page mentions that a certain blood level poses a severe danger to humans due the possibility to affect inner organs as well as blood formation. In other words, we classify the relationship as weak because a certain characteristic of blood can be used for characterizing both concepts while no imminently important relationship between both pages exists. 
+Taking these detected links together, pipeline A detected 1 of 3 possible links, while pipeline B detected all 3 links it also introduced additional noise in the form of spurious links into the graph. 
 
+#### Key Findings
+We summarize our key findings.
+Unrejected hypotheses are: H1, H2, H3, H4, H8, H9. 
+Refected were: H5, H6, H7, H10, H11. 
 
-#### Quantitative Evaluation Results
-#### Qualitative Evaluation Results
+Further, we identify the following trade-off: increasing the domain-specificity of the graph versus detecting all relevant nodes/links.
+While being connected to the issue of detecting relevant nodes, the major challenge in automatic knowledge graph construction resides in detecting domain-specific links across pages without introducing noise in the form of irrelevant links. Pipeline B was moderately successful in balancing this trade-off. While identifying the most relevant nodes, the percentage of these nodes compared to the overall amount of detected nodes is small. Likewise, it detects the most medically relevant links. But at the same time, it also contains spurious links without medical relevance. Pipeline A achieves a better balance. While it detects fewer nodes and links across pages, it does so by adding less noise to the graph. This hints towards the necessity of customizing a knowledge graph construction to its specific domain. However, our results also highlight that additional work is needed to finetune these components in order to achieve the best balance or even break the previously mentioned trade-off.  
 
 ## Discussion
 ### Limitations and Future Work
