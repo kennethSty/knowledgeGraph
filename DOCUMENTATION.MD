@@ -70,8 +70,7 @@ The following section lists details on implementing an automated system to gener
 ### Data Preprocessing
 The data extraction and preprocessing stage can again be split into two subtasks. One subtask involves several steps to extract and prepare the raw Wikipedia data for embedding and subsequent knowledge graph construction. The other subtask involves preparing the Medical Subject Headings file for later evaluation. 
 
-#### Wikipedia Data Preprocessing:
-
+#### Wikipedia Data Preprocessing
 In total, we extracted 10,000 German Wikipedia pages based on the keyword „Krankheit“ (=„Sickness“). The extraction uses the Wikipedia Extracts API, storing semi-parsed wikitext with headers and subheaders denoted by "==" and "===" respectively. To facilitate a seamless extraction procedure of the full 10.000 pages the Wikipedia Python package was overloaded to allow for a batch-wise iterative extraction procedure overwriting the „SROF“ identifier, which indicates the index of documents until which the last pages were retrieved. Extracting more than 10.000 pages related to the term „Krankheit“ was not possible even with this overloaded strategy, as the Wikipedia API imposes a hard limit on the amount of pages being retrievable for the same keyword. 
 As discussed earlier, the length of the pages as well as the complexity of the task give reason to limit the context size of each knowledge graph construction call as much as possible without cutting off important context in each chunk. For this purpose, we employed a conservative chunking strategy that consisted of splitting a page based on its section headers indicated with structural identifiers based on the Wikitext standard. The resulting chunked pages consisted of 34074 sections in total. During chunking the data 7463 paragraphs were empty and skipped. The average chunk/section of this procedure contains 201 tokens when tokenized with the spacy nlp tokenizer based on "de_core_news_sm". For reference, a full page on average has 848 tokens. Thus, the chunking strategy splits each page on average into four sections. To keep the information on the order of the sections in the original text, a unique section_id was generated indicating with an integer in front of the page id, if it was the first (0), or i-th section (i-1) as can be seen in the following example:
 
@@ -86,14 +85,14 @@ After chunking the extracted documents, both the pages as well as the sections a
 It has to be mentioned, that for constructing a knowledge graph this step is fully optional. However, as Neo4j offers an easy construction of a Graph Vector store from a graph database, enabling the usage of Knowledge Graphs as a highly enriched vector store, embedding both the pages and the sections seemed to be a reasonable preprocessing step to include in order to make the graph "ready to use" for retrieval-augmented or similar text generation pipelines. 
 
 
-#### MeSH Data Preprocessing:
+#### MeSH Data Preprocessing
 The German Medical Subject Headings dataset is downloadable in different file formats on the homepage of ZB MED. As the file contains both German and English terms in a nested restructure, preprocessing involves filtering out German terms by scanning through the tree and storing the terms in a set for keyword comparison in the later evaluation stage. Furthermore, we embedded each of the extracted terms with the procedure above using again `text-embedding-3-large` to enable a thoughtful evaluation based on semantic similarity. 
 
 The following illustration provides an overview of the previously mentioned preprocessing steps with respect to the files and structure of this repository. 
 ![Preprocessing](preprocessing.png)
 
 ### Knowledge Graph Construction Pipeline
-#### Graph Construction:
+#### Graph Construction
 Constructing and evaluating the knowledge graphs happens in two stages. In the first stage, the graph is constructed. This consists of a mixture of manual node and relationship creations as well as automatic node and relationship extraction from the preprocessed Wikipedia documents.  
 In the first step, we use Cypher queries to create a node for each page and a node for each section. Each section node thereby contains its section_id, its full content as well as its embedding. Each page node on the other hand contains its page_id, its title, its summary and its embedding. 
 Furthermore, we create a connection from each page to each section indicating their relationship. Also, we create a relationship between all succeeding sections as well as a pointer from each page to its first section. Lastly, we create a node for each category that appeared in the extracted documents and connect it to the pages where it was mentioned. The resulting graph forms the skeleton of the knowledge graph construction. 
@@ -102,7 +101,7 @@ Afterwards, we iterate over each of the preprocessed sections and provide it as 
 
 One iteration in the basic knowledge graph construction implementation in this project consists of passing a section to the GraphTransformer instance which returns a list of nodes and relationships which can then be upserted into Neo4j. We extend this basic pipeline with two optional features. The first feature consists of contextualizing the input prompt used in the base implementation to the medical domain. The other feature is more advanced. It employs a 5-bit quantized version of Llama3 Sauerkraut running on llama.cpp to filter out irrelevant nodes. I.e. we scan over all automatically extracted nodes of the GraphTransformer and show it to the Llama3 model, which then decides whether the extracted node has relevance for a medical knowledge graph or not. All nodes deemed irrelevant by the model are filtered out. The rest will be uploaded to the graph and connected to the node of the section out of which they were extracted. In this manner, we aimed to balance the trade-off between relevance and exhaustiveness of the information extracted and uploaded into the graph. 
 
-#### Graph Evaluation:
+#### Graph Evaluation
 After the graph construction is completed, the evaluation procedure is initiated. Initially, we conduct a Cypher query to extract all automatically created nodes in a list. Afterwards, we scan over each of these nodes. In one pass we perform the following steps. 
 First, we assess whether there is an exact term match in the German MeSH file prepared in the preprocessing stage. If there is, the node is added to matched_nodes and we increment the number of matches by one. If not, a second matching gate is entered. In this second gate, we embed the name of the node using `text-embedding-3-large` and retrieve the 4 most similar terms in the MeSH file based on cosine similarity. Given the node name embedding \(Q\) and the MeSH term embedding  \(D\) it is computed as[^12]:
 $$\text{Cosine Similarity}(Q, D) = \frac{Q \cdot D}{\|Q\| \cdot \|D\|}$$
@@ -172,10 +171,11 @@ The first hypothesis, H10, is based on the observation that both Lissencephaly a
 ### Evaluation Results
 #### Key Findings
 Before outlining the results in detail, we summarize our key findings.
-Unrejected hypotheses are: H1, H2, H3, H4, H8, H9. 
-Refected were: H5, H6, H7, H10, H11. 
+- *Unrejected hypotheses:* Unrejected hypotheses are: H1, H2, H3, H4, H8, H9. 
+- *Rejected hypotheses:* H5, H6, H7, H10, H11. 
 
-Further, we identify the following trade-off: increasing the domain-specificity of the graph versus detecting all relevant nodes/links.
+Further, we identify the following trade-off: *** increasing the domain-specificity of the graph versus detecting all relevant nodes/links.***
+
 While being connected to the issue of detecting relevant nodes, the major challenge in automatic knowledge graph construction resides in detecting domain-specific links across pages without introducing noise in the form of irrelevant links. Pipeline B was moderately successful in balancing this trade-off. While identifying the most relevant nodes, the percentage of these nodes compared to the overall amount of detected nodes is small. Likewise, it detects the most medically relevant links. But at the same time, it also contains spurious links without medical relevance. Pipeline A achieves a better balance. While it detects fewer nodes and links across pages, it does so by adding less noise to the graph. This hints towards the necessity of customizing a knowledge graph construction to its specific domain. However, our results also highlight that additional work is needed to finetune these components in order to achieve the best balance or even break the previously mentioned trade-off. 
 
 #### Results
