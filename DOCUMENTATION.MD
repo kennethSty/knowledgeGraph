@@ -171,10 +171,18 @@ Furthermore, we hypothesize the following relations between the 5 evaluation pag
 - *H10:* In graphs A, B and C there exists a path between the page node of Lissencephaly and the page node of Ryanodine receptors. 
 - *H11:* In graphs A, B and C there exists a path between the page node of Anthrax and the page node of Dermatitis.
 
-The first hypothesis, H10, is based on the observation that both Lissencephaly and Ryanodine receptors are concepts related to the human brain. While the extracted page on Lissencephaly explains it as a brain disease, the extracted Wikipedia page on Ryanodine receptors mentions certain activities in the brains of adults that could be related to learning. The second hypothesis is similarly based on observations made in the text of the related pages as both describe skin-related symptoms. Therefore we would expect a skin-related connection between both pages. From screening the Wikipedia pages, no other relationships were expected. The expectation that each of our pipeline configurations is going to detect these relationships is based on the following reasoning. As we expect graph A to identify the most nodes and relationships we expect it to identify these relationships as well. Further, while graph B and C are more restrictive in the nodes and relationships they extract, as we attuned these restrictions to the medical setting, we assume these relationships to be detected as well. 
+The first hypothesis, H10, is based on the observation that both Lissencephaly and Ryanodine receptors are concepts related to the human brain. While the extracted page on Lissencephaly explains it as a brain disease, the extracted Wikipedia page on Ryanodine receptors mentions certain activities in the brains of adults that could be related to learning. The second hypothesis is similarly based on observations made in the text of the related pages as both describe skin-related symptoms. Therefore we would expect a skin-related connection between both pages. From screening the Wikipedia pages, no other relationships were expected. The expectation that each of our pipeline configurations is going to detect these relationships is based on the following reasoning. As we expect graph A to identify the most nodes and relationships we expect it to identify these relationships as well. Further, while graphs B and C are more restrictive in the nodes and relationships they extract, as we attuned these restrictions to the medical setting, we assume these relationships to be detected as well. 
 
 
 ### Evaluation Results
+#### Key Findings
+Before outlining the results in detail, we summarize our key findings.
+Unrejected hypotheses are: H1, H2, H3, H4, H8, H9. 
+Refected were: H5, H6, H7, H10, H11. 
+
+Further, we identify the following trade-off: increasing the domain-specificity of the graph versus detecting all relevant nodes/links.
+While being connected to the issue of detecting relevant nodes, the major challenge in automatic knowledge graph construction resides in detecting domain-specific links across pages without introducing noise in the form of irrelevant links. Pipeline B was moderately successful in balancing this trade-off. While identifying the most relevant nodes, the percentage of these nodes compared to the overall amount of detected nodes is small. Likewise, it detects the most medically relevant links. But at the same time, it also contains spurious links without medical relevance. Pipeline A achieves a better balance. While it detects fewer nodes and links across pages, it does so by adding less noise to the graph. This hints towards the necessity of customizing a knowledge graph construction to its specific domain. However, our results also highlight that additional work is needed to finetune these components in order to achieve the best balance or even break the previously mentioned trade-off. 
+
 #### Results
 The following figure illustrates the results of the graph construction and evaluation runs. 
 
@@ -213,14 +221,7 @@ Besides the already discussed links, both graphs also include a link we did not 
 Taking these detected links together, pipeline A detected 1 of 3 possible links, while pipeline B detected all 3 links it also introduced additional noise in the form of spurious links into the graph. 
 
 ## Conclusion
-#### Key Findings
-We summarize our key findings.
-Unrejected hypotheses are: H1, H2, H3, H4, H8, H9. 
-Refected were: H5, H6, H7, H10, H11. 
-
-Further, we identify the following trade-off: increasing the domain-specificity of the graph versus detecting all relevant nodes/links.
-While being connected to the issue of detecting relevant nodes, the major challenge in automatic knowledge graph construction resides in detecting domain-specific links across pages without introducing noise in the form of irrelevant links. Pipeline B was moderately successful in balancing this trade-off. While identifying the most relevant nodes, the percentage of these nodes compared to the overall amount of detected nodes is small. Likewise, it detects the most medically relevant links. But at the same time, it also contains spurious links without medical relevance. Pipeline A achieves a better balance. While it detects fewer nodes and links across pages, it does so by adding less noise to the graph. This hints towards the necessity of customizing a knowledge graph construction to its specific domain. However, our results also highlight that additional work is needed to finetune these components in order to achieve the best balance or even break the previously mentioned trade-off.  
-
+ 
 ### Limitations and Future Work
 First of all, this project exhibits a limitation in the degree to which alternative approaches to constructing the same pipeline are compared. While, on the one hand, cluster-based approaches with open-source models were tested, the resources available to this project only allowed for locally deploying a quantized open-source model as a GraphTransformer. Together with the lack of the OpenAI-functions-stack, which is used in the background of LangChains GraphTransformer class, implementing the pipeline fully on open-source components would have required not only more computational resources to deploy unquantized models but also more research to assess how structural output limitations can be set within the opensource setting. While this went beyond the scope of this project, it poses an interesting opportunity for future work as the restriction to openAI-API-based functionality severely restricts the scalability of the pipeline to a larger corpus of text. 
 As of now, this also poses the most severe technical limitation of the proposed pipeline as its usage requires an OpenAI API key and sufficient funds to construct the graph from the provided corpus of text. 
