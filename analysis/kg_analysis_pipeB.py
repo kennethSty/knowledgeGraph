@@ -6,12 +6,12 @@ from collections import Counter
 kg = KnowledgeGraph()
 
 #Only outcomment this when you run the script the first time
-kg.query("""
-CALL gds.graph.project(
-  'my_graph',
-  '*',
-  '*')
-  """)
+#kg.query("""
+#CALL gds.graph.project(
+#  'my_graph',
+#  '*',
+#  '*')
+#  """)
 
 ## BETWEENNESS CENTRALITY
 #gds.util.asNode(nodeId).section_title, gds.util.asNode(nodeId).id, gds.util.asNode(nodeId).name .. page_title
@@ -61,36 +61,31 @@ sns.set(style="whitegrid", palette="viridis")
 colors = sns.color_palette("viridis", 4)
 fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(12, 10))
 
-# Plotting bars
-"""axes[0].bar(page_short_nodes, page_short_scores, color = colors[0])
-axes[0].set_xlabel('Pages', fontsize=14, color='darkgray')
-axes[0].set_ylabel('Betweenness Centrality', fontsize=14, color='darkgray')
-axes[0].grid(alpha=0.3, linestyle='--')
-axes[0].grid(alpha=0.3, linestyle='--')
-axes[0].set_xticklabels(page_short_nodes, color='darkgray')
-axes[0].tick_params(axis='x', rotation=45)
-
-
-axes[1].bar(section_short_nodes, section_short_scores, color = colors[1])
-axes[1].set_xlabel('Sections', fontsize=14, color='darkgray')
-axes[1].set_ylabel('Betweenness Centrality', fontsize=14, color='darkgray')
-axes[1].grid(alpha=0.3, linestyle='--')
-axes[1].set_xticklabels(section_short_nodes, color='darkgray')
-axes[1].tick_params(axis='x', rotation=45)
-
-"""
-
-axes.barh(node_short_nodes, node_short_scores, color = colors[2])
-axes.set_ylabel('Nodes', fontsize=14, color='white')
-axes.set_xlabel('Betweenness Centrality', fontsize=14, color='white')
+axes.bar(node_short_nodes, node_short_scores, color = colors[2])
+axes.set_ylabel('Betweenness Centrality', fontsize=18, color='white')
+axes.set_xlabel('Nodes', fontsize=18, color='white')
 axes.grid(alpha=0.6, linestyle='--')
-axes.set_title("Betweenness Centrality of auto. generated nodes", color='white', fontsize=18)
-axes.set_yticklabels(node_short_nodes, color='white', fontsize=16)
-axes.set_xticklabels([round(node) for node in node_short_scores[::-1]], color='white')
-axes.tick_params(axis='x')
+axes.set_title("Betweenness Centrality of auto. generated nodes", color='white', fontsize=20)
+axes.set_xticklabels(node_short_nodes, color='white', fontsize=20)
+axes.set_yticklabels([round(node) for node in node_short_scores[::-1]], color='white', fontsize=20)
+axes.tick_params(axis='x', rotation = 45)
 
 plt.tight_layout()
-plt.savefig('nodes_btw_centrality_pipeC.png', dpi=300, transparent=True)
+plt.savefig('nodes_btw_centrality_pipeA.png', dpi=300, transparent=True)
+
+fig2, axes2 = plt.subplots(nrows=1, ncols=1, figsize=(12, 10))
+not_mesh_percentages = [0, 30, 0]
+graphs = ["Graph A", "Graph B", "Graph C"]
+axes2.bar(graphs, not_mesh_percentages, color = colors[2])
+axes2.set_ylabel('% unmatched', fontsize=18, color='white')
+axes2.set_xlabel('Nodes', fontsize=18, color='white')
+axes2.grid(alpha=0.6, linestyle='--')
+axes2.set_title("Unmatched nodes among nodes with highest btw. centrality score", color='white', fontsize=20)
+axes2.set_xticklabels(graphs, color='white', fontsize=20)
+axes2.tick_params(axis='x', rotation = 45)
+
+plt.tight_layout()
+plt.savefig('unmatched.png', dpi=300, transparent=True)
 
 ## AVG SHORTEST PATH LENGTH
 avg_shortest_path_len = kg.query("""
@@ -183,7 +178,7 @@ axes[0][1].tick_params(axis='x', colors='white')
 axes[0][1].tick_params(axis='y', colors='white')
 
 plt.tight_layout()
-plt.savefig('shortest_paths_pipeC.png', dpi=300, transparent=True)
+plt.savefig('shortest_paths_pipeA.png', dpi=300, transparent=True)
 
 
 m = kg.query("""
