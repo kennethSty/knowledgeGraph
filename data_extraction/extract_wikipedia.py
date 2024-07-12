@@ -16,4 +16,4 @@ search_params = {
 #extract articles
 pages = search_wiki(search_params=search_params, batch_proc=True)
 pages_df = pd.DataFrame(pages)
-pages_df.to_csv(f"../data/pages_until_sroff_{search_params['sroffset']}.csv", encoding="utf-8", index=False) #if locally: ../data
+pages_df.to_csv(f"../data/00_raw/pages_until_sroff_{search_params['sroffset']}.csv", encoding="utf-8", index=False) #if locally: ../data

@@ -25,7 +25,7 @@ from utils.kg_utils import german_prompt
 from config import config
 
 #get llm settings from config
-load_dotenv('../config/keys.env', override=True)
+load_dotenv('../../config/keys.env', override=True)
 config = config.load_config()
 
 #OpenAI Models
@@ -61,9 +61,9 @@ if (config['llm'] == 'llama2' and config['local_modelling']):
 # Sections & Auto Nodes
 generated_graph_dict = {}
 #note without ../ only on cluster. other ../data_cluster
-with open("../data_cluster/small_embedded_chunks.csv") as input_csv, \
-     open("../data_cluster/node_list.csv", "w") as nodes_csv, \
-     open("../data_cluster/edge_list.csv", "w") as edges_csv:
+with open("../../data_cluster/small_embedded_chunks.csv") as input_csv, \
+     open("../../data_cluster/node_list.csv", "w") as nodes_csv, \
+     open("../../data_cluster/edge_list.csv", "w") as edges_csv:
 
 
         #prepare files for reading and writing

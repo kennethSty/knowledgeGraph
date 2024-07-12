@@ -6,6 +6,7 @@
 *.json
 *.txt
 *.gguf
+*.png
 
 #ignore .env files
 *.env

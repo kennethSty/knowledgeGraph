@@ -7,6 +7,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_core.prompts import PromptTemplate
 from langchain.chains import LLMChain
+from langchain_openai import ChatOpenAI
 from langchain_community.graphs.graph_document import Node, Relationship
 import json
 
@@ -196,7 +197,7 @@ RETURN count(r)
 """
 
 # graph transformer prompt
-##llm checker prompt
+##llm checker prompt llama3
 llm_checker_system_text = """
     Deine Aufgabe ist es, zu entscheiden, ob ein gegebenen Begriff einen medizinischen Bezug hat oder nicht.
     Gebe "True" aus, wenn der Begriff medizinisch ist und "False" wenn nicht. Achte dabei darauf, dass auch umgangssprachliche Begriffe einen medizinischen Bezug haben können.
@@ -219,6 +220,26 @@ llama_template = """
         """
 llm_checker_prompt = PromptTemplate.from_template(llama_template.format(system_prompt = llm_checker_system_text,
                                                           user_prompt = llm_checker_user_text))
+#llm checker prompt & chain OpenAI
+node_checker_prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            llm_checker_system_text,
+        ),
+        (
+            "human",
+            llm_checker_user_text,
+        ),
+    ]
+)
+
+
+def get_checker_chain():
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", api_key=OPENAI_API_KEY)
+    chain = node_checker_prompt | llm
+    return chain
 
 
 ## Node Detection Prompts
@@ -314,25 +335,4 @@ german_med_prompt = ChatPromptTemplate.from_messages(
         ),
     ]
 )
-
-
-
-
-## Legacy Prompts
-
-med_lama_system = ("""
-    Gegeben ist ein unstrukturierter Text. Deine Aufgabe ist es, alle relevanten medizinischen Begriffe und verwandten Konzepte aus dem Text in eine Liste zu extrahieren.
-    Input: "Heute habe ich ein Aspirin genommen",
-    Output: ["Aspirin"]
-    """)
-
-
-med_lama_user = ("Tipp: Stelle sicher, dass Du in dem Format einer python Liste antwortest."
-                "Extrahiere die Liste medizinischer Begrife aus folgendem Input: {input}")
-
-med_llama_prompt = PromptTemplate.from_template(llama_template.format(system_prompt = med_system_prompt,
-                                                          user_prompt = med_lama_user))
-
-
-
 
