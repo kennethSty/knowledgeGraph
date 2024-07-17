@@ -129,7 +129,7 @@ The following illustration outlines the previously described construction and ev
 We evaluated three different pipeline configurations on 5 random pages out of the retrieved 10k Wikipedia pages. The small scale of this evaluation approach was partly due to the costs accompanied by OpenAI API calls. But more importantly, the small scale was also motivated by the opportunity of being able to analyse the graphs in detail when they were small. As this project aimed to explore the possibility of creating knowledge graphs using LLMs, this detailed view was prioritized over large-scale experiments. Therefore, in the following section, we reflect on the different generated small graphs from various quantitative and qualitative angles, in order to shed light on the inner workings and challenges of MKG construction. These multiple viewpoints per constructed graph consist of: 
 - General graph metrics such as the number of nodes and edges
 - The density of medically relevant information within the graph, measured by the percentage of nodes matched within the German MeSH database
-- Different stages of connectivity, evaluated qualitatively by assessing shortest paths and nodes with high betweenness centrality
+- Different stages of connectivity, evaluated qualitatively by assessing shortest paths between pages and nodes with high betweenness centrality scores
 
 The following pipeline configurations were evaluated. 
 
