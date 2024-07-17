@@ -3,7 +3,7 @@ Automatic knowledge graph construction based on German Wikipedia pages.
 
 -------------
 
-![example graph](/pipe_good.png)
+![example graph](analysis/pipe_good.png)
 
 
 ## Overview
