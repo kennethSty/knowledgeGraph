@@ -66,7 +66,7 @@ The evaluation dataset consisted of five randomly selected Wikipedia pages and c
 
 The pages were relatively long, containing 32 sections in total, with the average section consisting of 357.75 tokens.  Specifically, it has to be remarked that all pages contain highly specialized medical information not only indicated by their titles but also by the 10 most frequent bigrams within the text (to the non-German reader: please excuse the missing English translation within the plot. The translations are provided below). 
 On the one hand, bigrams such as "bacillus anthracis," "penicillin G," "doxycycline penicillin," and "ciprofloxacin doxycycline", indicate information out of clinical microbiology, pharmacology, and antibiotic treatments. On the other hand, the inclusion of "Milzbrand" represents information about infectious diseases, while the bigrams "lissencephaly mutations" indicate that the lissencephaly page includes information related to genealogy. Additionally, it can be observed that the diversity in the formulations within the medical text is quite high. Since the most frequent 2-gram (bacillus anthracis) only appears six times. Consequently, we assume that the texts used for evaluation are able to serve as a sufficient representation for general medical literature. 
-![2grams](eval_data_ngrams.png)
+![2grams](analysis/eval_data_ngrams.png)
 
 
 ## Methods
@@ -94,7 +94,7 @@ It has to be mentioned, that for constructing a knowledge graph this step is ful
 The German Medical Subject Headings dataset is downloadable in different file formats on the homepage of ZB MED [^11]. As the file contains both German and English terms in a nested structure, preprocessing involves filtering out German terms by scanning through the tree and storing the terms in a set for keyword comparison in the later evaluation stage. Furthermore, we embedded each of the extracted terms with the procedure above using again `text-embedding-3-large` to enable a later evaluation based on semantic similarity of detected nodes and MeSH terms. 
 
 The following illustration provides an overview of the previously mentioned preprocessing steps with respect to the files and structure of this repository. 
-![Preprocessing](preprocessing.png)
+![Preprocessing](analysis/preprocessing.png)
 
 ### Knowledge Graph Construction Pipeline
 #### Graph Construction
@@ -118,7 +118,7 @@ It has to be remarked that the second quality gate was implemented only, because
 Besides outputting the final amount of matches as determined with the above pipeline, we also document the nodes that would have been filtered out because they did not match the exact terminology used in the German MeSH file. Those are saved in the third file `unmatched_candidates`. 
 
 The following illustration outlines the previously described construction and evaluation steps graphically. 
-![Graph Construction](kg_construction.png)
+![Graph Construction](analysis/kg_construction.png)
 
 ## Evaluation
 We evaluated three different pipeline configurations on 5 random pages out of the retrieved 10k Wikipedia pages. The small scale of this evaluation approach was partly due to the cost accompanied by OpenAI API calls. But more importantly, it was motivated to provide the opportunity for a qualitative analysis of a rather small graph. Therefore, in the following section, we reflect on the different generated graphs from different quantitative and qualitative angles, in order to improve our local and global understanding of the inner workings and challenges during MKG construction. These multiple viewpoints per constructed graph consist of: 
@@ -211,16 +211,16 @@ H5, however, is not confirmed, as the difference of one percentage point between
 
 While our results emphasize the importance of the second filter chain for ensuring domain specificity, they also show it requires further tuning. In absolute numbers, Pipeline B (without the filter) identifies 101 more MeSH-matched entities than Pipeline A. A similar drop can be observed from Graph B to C. In other words, when using the filter, we increase precision, but we reduce recall as indicated by the 100+ nodes that were falsely filtered out in pipelines A and C. Consequently, H6 and H7 have to be rejected. Possible explanations for this behaviour could be the simple input prompt used for the filter chain, which was necessary to ensure stable outputs of the quantized Llama3 Sauerkraut model. Thus, a possible improvement resides in switching choosing a different technological set-up to deploy Lllama3 Sauerkraut without quantization. An additional explanation for the large unexpected difference in absolute number could be that the terms included in the MeSH do not exclusively include medical terms. We find indications for this in the subsequent stage of the evaluation. 
 
-![betweenness centrality](btw_centrality.png)
+![betweenness centrality](analysis/btw_centrality.png)
 Considering, the connectivity of the graphs we make two observations. First, as hypothesized among the nodes with the highest betweenness centrality in Graph B not all are medically related. In fact, 30% of the nodes, namely "Altlastenmaterialien", "Holzschutzmittel" and "Gerber" are not matched within the Medical Subject Headings Database. Thus, as a result of lacking restrictions, Pipeline B creates spurious relationships between concepts that might be linguistically but not medically relevant. Pipelines A and C, which included at least one form of domain-specific restriction, did not exhibit these problems as all their nodes with high scores in betweenness centrality are clearly medically related. This confirms our hypotheses H8 and H9. 
 
 It has to be remarked that two other central and clearly medically unrelated nodes  of Graph B, namely "Deutschland" and "Schweiz", are included in the Medical Subject Headings thesaurus. This is unexpected and to at least some degree weakens its suitability as a ground truth graph of medically relevant concepts. We will reflect more on this observation in the section on our project's limitations.
 
 
-![Shortest Paths Overview](shortest_path_overviews.png)
+![Shortest Paths Overview](analysis/shortest_path_overviews.png)
 Next, we assess H10 and H11 as well as the connectivity between pages in general. Several paths between all pages (forward and backward) exist in Graph B. Unexpectedly no path exists in Graph C (which is why it is not included in the figure). In Graph A, only one path exists, which is not one of the paths we expected. Consequently, H10 and H11 need to be rejected. Especially intriguing is the existence of a link in Graph A but the absence of a link in Graph C. Together with the previously discussed MeSH precision, this highlights the importance of aligning the input prompt and node filter chain to the same domain-specific extraction purpose in order to increase the likelihood of detecting relevant nodes and edges. Similarly notable is the large difference in Graphs B and A regarding the number of links between pages. To assess whether the accurately detected links between "Lissencephaly - Ryanodine Receptors" and "Anthrax - Dermatitis" in Graph B indeed match our expected relationships between the pages, we assess the shortest paths visually in the following figure. 
 
-![Shortest Page Paths](shortest_path_A&B.png)
+![Shortest Page Paths](analysis/shortest_path_A&B.png)
 Indeed the detected links in Graph B demonstrate the expected relationship. Namely a connection between Lissencephaly and Ryanodine Receptors via the node "brain" and a connection between Anthrax and Dermatitis, via the skin symptom "blisters". Although including the prompt and node filter restriction to the medical case, Pipeline A is not able to identify these relationships. Graph B, however, also contains several links one could classify as "medically irrelevant" or "spurious" such as, for instance, the connection between Anthrax and Lindan via the node "Schweiz" (engl.: Swiss). 
 Besides the already discussed links, both graphs also include a link we did not anticipate. A link between "Lindan" and "Anthrax" via the node "blood". While blood is indeed a medical node, we nevertheless consider the detected relationship to be only a weak one given the context in which the term blood appears. In the case of Anthrax, the corresponding page mentions black blood colour to indicate an anthrax-diseased milt. In the case of Lindan, the page mentions that a certain blood level poses a severe danger to humans due the possibility to affect inner organs as well as blood formation. In other words, we classify the relationship as weak because a certain characteristic of blood can be used for characterizing both concepts while no imminently important relationship between both pages exists. 
 Taking these detected links together, Pipeline A detected 1 of 3 possible links. Pipeline B detected all 3 links but at the cost of additional noise in the form of spurious links. 
