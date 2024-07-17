@@ -1,7 +1,7 @@
 # Automated Generation of a German Medical Knowledge Graph (MKG) Using Large Language Models
 
 ## Disclaimer
-The figures in this report are only correctly displayed when using Github's **dark mode**. Please excuse the inconvenience. 
+This report was created for Github's **dark mode**.  
 
 ## Introduction
 Under the guidance of WikiProject Medicine, Wikipedia collects and distributes an ever-growing body of biomedical knowledge. But within the scope of millions of publications in databases such as PubMed, and thousands of articles in Wikipedia finding up-to-date answers to questions, is time-consuming beyond limits [^1]. Thus, to assist clinicians and affected patients in their search for answers to their questions, several question-answering systems based on retrieval-augmented generation have been proposed [^32] [^33]. However, answering questions reliably based on the most recent information remains a challenge that has yet be to overcome as many systems struggle with "connecting the dots" between various documents of importance [^6].
