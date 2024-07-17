@@ -57,7 +57,7 @@ The output of each node in the pipeline is stored in the data folders ranging fr
 
    then switch to the working directory of the project:
    ```bash
-   cd PubMedTempGraph
+   cd your_project_env
    ```
    
 6. **Install Dependencies:**
