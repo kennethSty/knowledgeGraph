@@ -29,7 +29,7 @@ The output of each node in the pipeline is stored in the data folders ranging fr
 
 - **Neo4j:** Neo4j Graph Database: Neo4j is a highly scalable, native graph database. In the project, Neo4j was used as the database to store and grow the generated detected relational data in a knowledge graph. For this purpose, a local Neo4j with apoc plugin as I ll as read and write file access was initialized.
 
-- **Wikipedia API:** The data extracted for this project, consisted of German Wikipedia pages related to the term "sickness" which I obtained via the Wikipedia API. The basis of the API extraction was based on the Wikipedia python package, which was overloaded and extended in certain functionalities key for extracting the data at scale.
+- **Wikipedia API:** The data extracted for this project, consisted of German Wikipedia pages related to the term "sickness" which I obtained via the Wikipedia API. The basis of extraction was based on the Wikipedia python package, which was overloaded and extended in certain functionalities key for extracting the data at scale.
 
 ## Installation and Set-up
 
@@ -146,7 +146,7 @@ If you are interested in constructing larger knowledge graphs based on the extra
    - Go to `page2vec.py` and change the input path in line 27 to `../data/02_preprocessed/big_pages_total.csv` to fit the change made above.
    - Do the same in `text2vec.py` with `../data/02_preprocessed/big_pages_chunked.csv`.
    - As above, define  new output paths in each file to not overwrite the preprocessed evaluation data. Use for example the paths `../data/03_model_input/big_embedded_pages.csv` in the page2vec.py file and `../data/03_model_input/big_embedded_chunks.csv` in the text2vec.py file. 
-   - Executing both `text2vec.py` and `page2vec.py` will now embed each page based on the page's title + summary and each section based on the section's content using OpenAI Embeddings. The results are stored in the location you have defined earlier, i.e. `../data/03_model_input/big_embedded_pages.csv` and and `../data/03_model_input/big_embedded_chunks.csv`.
+   - Executing both `text2vec.py` and `page2vec.py` will now embed each page based on the page's title + summary and each section based on the section's content using OpenAI Embeddings. The results are stored in the location you have defined earlier, i.e. `../data/03_model_input/big_embedded_pages.csv` and `../data/03_model_input/big_embedded_chunks.csv`.
 
 3. **Run Knowledge Graph Construction:**
    - Go to the parameters.yml file and configure the settings you want to use for executing the pipeline. For the best possible outcome set:
