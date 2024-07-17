@@ -80,10 +80,10 @@ The output of each node in the pipeline is stored in the data folders ranging fr
    CMAKE_ARGS="-DLLAMA_METAL=on" FORCE_CMAKE=1 pip install --upgrade --force-reinstall llama-cpp-python --no-cache-dir
    ```
 
-   If anything goes wrong in this step, please refer to the installation guide provided [here](https://python.langchain.com/docs/integrations/llms/llamacpp) and also [here](https://llama-cpp-python.readthedocs.io/en/latest/install/macos/)
+   If anything goes wrong in this step, please refer to the installation guide provided [here](https://python.langchain.com/docs/integrations/llms/llamacpp) and also [here](https://llama-cpp-python.readthedocs.io/en/latest/install/macos/).
 
 9. **Neo4j Setup:**
-   - Download Neo4j [here](https://neo4j.com/download/) and follow the installation guide [here](https://neo4j.com/docs/operations-manual/current/installation/osx/). Node: My implementation was configured with OpenJDK 17.
+   - Download Neo4j [here](https://neo4j.com/download/) and follow the installation guide [here](https://neo4j.com/docs/operations-manual/current/installation/osx/). Remark: My implementation was configured with OpenJDK 17.
    - Open Neo4j on your local machine and set up the Apoc and GDS plugin by clicking through the UI `dbms>plugin>apoc>install` and `dbms>plugin>gds>install`.
    - Open the directory in your NEO4J HOME where the neo4j.config is located and create an 'apoc.config file'. In this file include
      ```bash
