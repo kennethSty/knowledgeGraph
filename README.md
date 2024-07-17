@@ -93,7 +93,7 @@ The output of each node in the pipeline is stored in the data folders ranging fr
 
 10. **Data & Model Setup:**
       - Download the [model file](https://huggingface.co/VAGOsolutions/Llama-3-SauerkrautLM-8b-Instruct). Insert the model file at `models/Llama-3-SauerkrautLM-8b-Instruct-Q5_K_M.gguf`.
-      - For a minimal test setup go to [this](https://drive.google.com/drive/folders/1-8hVX75ui3wtk-4OPQckqe8EdvQtv-1H?usp=sharing) Google Drive link and download the data folder (folder called `data`). Insert the data folder store in the `data` directory.
+      - For a minimal test setup go to [this](https://drive.google.com/drive/folders/1-8hVX75ui3wtk-4OPQckqe8EdvQtv-1H?usp=sharing) Google Drive link and download the data folder (folder called `data`). Insert the data folder in the `data` directory.
       - Set up an OpenAI Account [here](https://openai.com/index/openai-api/).
 
 11. **API Setup:**
