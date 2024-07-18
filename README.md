@@ -11,9 +11,9 @@ This project utilizes a combination of Langchain, ChromaDB, Neo4j and llama.cpp 
 1. Data extraction from Wikipedia
 2. Data preprocessing to prepare the raw text for knowledge graph construction
 3. Knowledge graph construction
-4. Pipeline evaluation
+4. Graph evaluation
 
-The output of each node in the pipeline is stored in the data folders ranging from 00_raw, storing the extracted raw Wikipedia pages, over several stages of preprocessing to 04_eval, storing the evaluation results and 05_graphs which stores the constructed knowledge graphs exported out of Neo4J into a JSON file. 
+The output of each node in the pipeline is stored in the data folders ranging from `00_raw`, storing the extracted raw Wikipedia pages, over several stages of preprocessing to `04_eval`, storing the evaluation results and `05_graphs` which stores the constructed knowledge graphs exported out of Neo4J into a JSON file. 
 
 ## Disclaimer
 We advise you to read our technical report located in `DOCUMENTATION.md` before trying to clone the project as it will provide a deeper understanding of the technical set-up whose installation is described here. 
