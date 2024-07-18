@@ -191,7 +191,7 @@ The pipeline is segmented into several interdependent scripts. Each high-level f
   Stores helper functions separately as explained earlier.
 
 
-## Reproduction & Cost Estimation
+## Cost Estimation
 To use the methodologies implemented in the pipeline the user may rerun the scripts in the order discussed above. 
 WARNING: Depending on the model used for knowledge graph construction the costs may vary significantly. I  highly recommend executing the pipeline with GPT-3.5-Turbo. To estimate the costs consider the new API rates specified [here](https://openai.com/api/pricing/). Note that a fully accurate estimation is challenging since the larger fraction of the costs depends on the amount of outputted tokens per API call, which cannot be determined apriori.
 
