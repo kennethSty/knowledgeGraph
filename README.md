@@ -34,7 +34,7 @@ The output of each node in the pipeline is stored in the data folders ranging fr
 ## Installation and Set-up
 
 1. **Prerequisites:**
-   - Ensure you have Python installed on your system. Your Python version should match 3.10.
+   - Ensure you have Python installed on your system. Your Python version should match 3.11.
    - Ensure to have conda installed on your system.
    - Create a folder where you want to store the project.
 
